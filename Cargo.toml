@@ -12,7 +12,7 @@ path = "src/bin/ws_kernel_io.rs"
 
 [dependencies]
 uuid = { version = "0.8.2", features = ["v4"]}
-tokio = { version = "1", features = ["full" ], feature="sync" }
+tokio = { version = "1", features = ["full" ]}
 tokio-tungstenite = "*"
 log = "0.4"
 env_logger = "0.8.4"
