@@ -5,7 +5,9 @@
 //! any output from the consumption port back through open
 //! websocket connections.
 
-use crate::kernel_io::ws_io::ws_message_consumption_port::WsMessageConsumptionPort;
+use crate::kernel_io::ws_io::ws_message_consumption_port::{
+    MessageConsumptionResponse, WsMessageConsumptionPort,
+};
 use futures_util::{SinkExt, StreamExt};
 use log::{error, info, trace};
 use std::net::SocketAddr;
@@ -15,42 +17,66 @@ use tokio::{
 };
 use tokio_tungstenite::{accept_async, tungstenite::protocol::Message};
 
-pub async fn run_server(addr: &'static str, consumption_port: impl WsMessageConsumptionPort) {
+#[cfg(test)]
+mod tests;
+
+pub fn run_server(addr: &'static str, consumption_port: &impl WsMessageConsumptionPort) {
     /*
     First initialize the channels used for
     communication between tasks
     */
-    let (out_tx, mut out_rx) = watch::channel(String::new());
+    let (out_tx, out_rx) = watch::channel(String::new());
     let (in_tx, mut in_rx) = mpsc::channel::<String>(32);
 
-    tokio::spawn(async move {
-        let listener = TcpListener::bind(addr)
-            .await
-            .expect("Server was unable to connect");
+    let _unused_clone = in_tx.clone();
 
-        info!("Listening on {}", addr);
+    /*
+    Create a multi-threaded runtime and spawn
+    a background task to handle all ws connections
+    */
+    tokio::runtime::Builder::new_multi_thread()
+        .enable_all()
+        .build()
+        .unwrap()
+        .spawn(async move {
+            let listener = TcpListener::bind(addr)
+                .await
+                .expect("Server was unable to connect");
 
-        /*
-        Loop through all new connections, handling each one
-        */
-        loop {
-            match listener.accept().await {
-                Ok((stream, _)) => match stream.peer_addr() {
-                    Ok(peer) => {
-                        /*
-                        At this point we have all the info necessary to handle
-                        the new connection, so clone the necessary channels and
-                        spawn a new task to handle the connection
-                        */
-                        let in_tx_clone = in_tx.clone();
-                        let out_rx_clone = out_rx.clone();
+            info!("Listening on {}", addr);
+
+            /*
+            Loop through all new connections, handling each one
+            */
+            loop {
+                match listener.accept().await {
+                    Ok((stream, _)) => {
+                        info!("Got a new stream!");
+
+                        match stream.peer_addr() {
+                            Ok(peer) => {
+                                /*
+                                At this point we have all the info necessary to handle
+                                the new connection, so clone the necessary channels and
+                                spawn a new task to handle the connection
+                                */
+                                let in_tx_clone = in_tx.clone();
+                                let out_rx_clone = out_rx.clone();
+
+                                tokio::spawn(handle_connection(
+                                    stream,
+                                    peer,
+                                    in_tx_clone,
+                                    out_rx_clone,
+                                ));
+                            }
+                            Err(e) => error!("Unable to acquire socket peer address: {}", e),
+                        }
                     }
-                    Err(e) => error!("Unable to acquire socket peer address: {}", e),
-                },
-                Err(e) => error!("Failed to accept new connection: {}", e),
+                    Err(e) => error!("Failed to accept new connection: {}", e),
+                }
             }
-        }
-    });
+        });
 
     /*
     In the main thread, loop on blocking receives to consume
@@ -64,12 +90,34 @@ pub async fn run_server(addr: &'static str, consumption_port: impl WsMessageCons
         Consume the message, and if the message produces an output
         send the message out to all open ws connections watching out_rx
         */
-        if let Some(output) = consumption_port.consume_ws_message(msg) {
-            if let Err(e) = out_tx.send(output) {
-                error!("Error sending consumption output to ws connections: {}", e);
+        match consumption_port.consume_ws_message(msg) {
+            MessageConsumptionResponse::Message(output) => {
+                /*
+                We have some text we should send back to the clients
+                */
+                if let Err(e) = out_tx.send(output) {
+                    error!("Error sending consumption output to ws connections: {}", e);
+                }
             }
+            MessageConsumptionResponse::Terminate(output) => {
+                /*
+                Time to terminate the server, but let's send the
+                final message first
+                */
+                if let Err(e) = out_tx.send(output) {
+                    error!(
+                        "Error sending consumption termination output to ws connections: {}",
+                        e
+                    );
+                }
+
+                break;
+            }
+            MessageConsumptionResponse::None => (),
         }
     }
+
+    info!("Shutting down the server");
 }
 
 pub async fn handle_connection(
@@ -84,7 +132,7 @@ pub async fn handle_connection(
     First attempt to accept the new connection
     */
     match accept_async(stream).await {
-        Ok(mut ws_stream) => {
+        Ok(ws_stream) => {
             /*
             Ok, now that we have the actual ws stream, split it into
             a sender and receiver
