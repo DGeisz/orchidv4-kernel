@@ -1,1 +1,1 @@
-mod curator_control_port;
+pub mod curator_control_port;

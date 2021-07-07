@@ -20,7 +20,7 @@ impl WsCommandParser {
 }
 
 impl WsMessageConsumptionPort for WsCommandParser {
-    fn consume_ws_message(&self, message: String) -> MessageConsumptionResponse {
+    fn consume_ws_message(&mut self, message: String) -> MessageConsumptionResponse {
         /*
         Attempt to deserialize the message
         */

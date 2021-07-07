@@ -11,5 +11,5 @@ pub trait WsCommandConsumptionPort {
     /// First return is the actual response, second return
     /// is whether to terminate the server following the completion
     /// of the response
-    fn consume_ws_command(&self, ws_command: WsCommand) -> (WsResponse, bool);
+    fn consume_ws_command(&mut self, ws_command: WsCommand) -> (WsResponse, bool);
 }
