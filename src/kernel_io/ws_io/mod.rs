@@ -10,5 +10,6 @@ pub mod ws_server;
 pub async fn run_ws_io(addr: &'static str) {
     /*
     First we're going to initialize the curator
+    TODO: Run the server assembler
     */
 }
