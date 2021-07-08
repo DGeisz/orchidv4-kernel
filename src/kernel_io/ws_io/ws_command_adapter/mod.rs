@@ -14,8 +14,10 @@ pub struct WsCommandAdapter {
 }
 
 impl WsCommandAdapter {
-    pub fn new(curator_controller: Box<dyn CuratorControlPort>) -> WsCommandAdapter {
-        WsCommandAdapter { curator_controller }
+    pub fn new(
+        curator_controller: Box<dyn CuratorControlPort>,
+    ) -> Box<dyn WsCommandConsumptionPort> {
+        Box::new(WsCommandAdapter { curator_controller })
     }
 }
 

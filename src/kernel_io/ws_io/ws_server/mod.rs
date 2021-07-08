@@ -23,7 +23,8 @@ mod tests;
 
 pub async fn run_server(
     addr: &'static str,
-    mut consumption_port: impl WsMessageConsumptionPort + Send + 'static,
+    generate_consumption_port: fn() -> Box<dyn WsMessageConsumptionPort>,
+    // mut consumption_port: impl WsMessageConsumptionPort + Send + 'static,
 ) {
     /*
     First initialize the channels used for
@@ -47,6 +48,7 @@ pub async fn run_server(
     thread::spawn(move || {
         while let Some(msg) = in_rx.blocking_recv() {
             info!("Received in orchid loop message: {}", msg);
+            let mut consumption_port = generate_consumption_port();
 
             /*
             Consume the message, and if the message produces an output
@@ -139,7 +141,10 @@ pub async fn run_server(
     /*
     Wait on the message to terminate the process
     */
-    terminate_rx.changed().await.unwrap();
+    match terminate_rx.changed().await {
+        Ok(_) => (),
+        Err(e) => error!("Termination error: {}", e),
+    }
     info!("Ending the ws server");
 }
 

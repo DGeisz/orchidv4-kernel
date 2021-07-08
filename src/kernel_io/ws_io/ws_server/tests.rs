@@ -1,5 +1,5 @@
 use crate::kernel_io::ws_io::ws_message_consumption_port::{
-    MessageConsumptionResponse, MockWsMessageConsumptionPort,
+    MessageConsumptionResponse, MockWsMessageConsumptionPort, WsMessageConsumptionPort,
 };
 use crate::kernel_io::ws_io::ws_server::run_server;
 use futures_util::{SinkExt, StreamExt};
@@ -24,16 +24,12 @@ async fn multi_client_test() {
     Initialize the messages to and from the server
     */
     let req1 = String::from("FirstReq");
-    let req1_c1 = req1.clone();
 
     let req2 = String::from("SecondReq");
-    let req2_c1 = req2.clone();
 
     let no_op_req = String::from("NoOp");
-    let no_op_req1 = no_op_req.clone();
 
     let kill_req = String::from("KillReq");
-    let kill_req_c1 = kill_req.clone();
 
     let res1 = String::from("Res1");
     let res1_c1 = res1.clone();
@@ -233,29 +229,37 @@ async fn multi_client_test() {
         write.unwrap();
     });
 
+    let (_, t) = tokio::join!(run_server(addr, create_ws_message_mock), task);
+
+    t.unwrap()
+}
+
+pub fn create_ws_message_mock() -> Box<dyn WsMessageConsumptionPort> {
     let mut mock = MockWsMessageConsumptionPort::new();
 
+    let req1 = String::from("FirstReq");
+    let req2 = String::from("SecondReq");
+    let no_op_req = String::from("NoOp");
+    let kill_req = String::from("KillReq");
+    let res1 = String::from("Res1");
+    let res2 = String::from("Res2");
+    let kill_res = String::from("ResKill");
+
     mock.expect_consume_ws_message()
-        .with(eq(req1_c1))
-        .times(1)
+        .with(eq(req1))
         .return_const(MessageConsumptionResponse::Message(res1));
 
     mock.expect_consume_ws_message()
-        .with(eq(req2_c1))
-        .times(1)
+        .with(eq(req2))
         .return_const(MessageConsumptionResponse::Message(res2));
 
     mock.expect_consume_ws_message()
-        .with(eq(no_op_req1))
-        .times(1)
+        .with(eq(no_op_req))
         .return_const(MessageConsumptionResponse::None);
 
     mock.expect_consume_ws_message()
-        .with(eq(kill_req_c1))
-        .times(1)
+        .with(eq(kill_req))
         .return_const(MessageConsumptionResponse::Terminate(kill_res));
 
-    let (_, t) = tokio::join!(run_server(addr, mock), task);
-
-    t.unwrap()
+    Box::new(mock)
 }
