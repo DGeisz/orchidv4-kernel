@@ -23,7 +23,7 @@ mod tests;
 
 pub async fn run_server(
     addr: &'static str,
-    consumption_port: impl WsMessageConsumptionPort + Send + 'static,
+    mut consumption_port: impl WsMessageConsumptionPort + Send + 'static,
 ) {
     /*
     First initialize the channels used for

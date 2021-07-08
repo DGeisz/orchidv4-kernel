@@ -1,4 +1,4 @@
-use crate::curator::curator_control_port::{CuratorControlPort, MockCuratorControlPort};
+use crate::curator::curator_control_port::MockCuratorControlPort;
 use crate::kernel_io::ws_io::ws_command_adapter::ws_commands::WsCommand;
 use crate::kernel_io::ws_io::ws_command_adapter::ws_response::WsResponse;
 use crate::kernel_io::ws_io::ws_command_adapter::WsCommandAdapter;

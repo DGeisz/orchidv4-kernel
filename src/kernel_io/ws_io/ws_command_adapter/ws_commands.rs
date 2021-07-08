@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 /// for adaption to the curator control port.
 ///
 /// Most commands have a direct controller counterpart
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Eq, PartialEq, Debug)]
 pub enum WsCommand {
     /*
     First we have basic editor commands

@@ -6,3 +6,9 @@ pub mod ws_command_consumption_port;
 pub mod ws_command_parser;
 pub mod ws_message_consumption_port;
 pub mod ws_server;
+
+pub async fn run_ws_io(addr: &'static str) {
+    /*
+    First we're going to initialize the curator
+    */
+}

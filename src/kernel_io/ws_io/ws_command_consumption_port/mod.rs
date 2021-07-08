@@ -1,9 +1,11 @@
-//! The ws command consumption port provides a port
-//! to a module that processes a parsed ws command.
-
 use crate::kernel_io::ws_io::ws_command_adapter::ws_commands::WsCommand;
 use crate::kernel_io::ws_io::ws_command_adapter::ws_response::WsResponse;
+use mockall::predicate::*;
+use mockall::*;
 
+/// The ws command consumption port provides a port
+/// to a module that processes a parsed ws command.
+#[automock]
 pub trait WsCommandConsumptionPort {
     /// Consumes a parsed command and returns the ws
     /// response to the command from the curator

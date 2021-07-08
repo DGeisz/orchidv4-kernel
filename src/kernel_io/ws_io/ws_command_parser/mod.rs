@@ -4,6 +4,9 @@ use crate::kernel_io::ws_io::ws_message_consumption_port::{
     MessageConsumptionResponse, WsMessageConsumptionPort,
 };
 
+#[cfg(test)]
+mod tests;
+
 /// The struct that attempts to parse
 /// the raw text from websocket messages
 /// into meaningful commands
@@ -14,7 +17,7 @@ pub struct WsCommandParser {
 impl WsCommandParser {
     pub fn new(
         command_consumer: Box<dyn WsCommandConsumptionPort>,
-    ) -> Box<dyn WsCommandConsumptionPort> {
+    ) -> Box<dyn WsMessageConsumptionPort> {
         Box::new(WsCommandParser { command_consumer })
     }
 }

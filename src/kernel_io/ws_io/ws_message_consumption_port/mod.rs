@@ -9,7 +9,7 @@ use mockall::*;
 pub trait WsMessageConsumptionPort {
     /// Consumes a raw ws message and optionally returns
     /// text meant to be sent back through all ws clients
-    fn consume_ws_message(&self, message: String) -> MessageConsumptionResponse;
+    fn consume_ws_message(&mut self, message: String) -> MessageConsumptionResponse;
 }
 
 /// The response from a message consumer
