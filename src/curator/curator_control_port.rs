@@ -1,4 +1,3 @@
-use mockall::predicate::*;
 use mockall::*;
 
 /// Provides an interface for sending commands and receiving

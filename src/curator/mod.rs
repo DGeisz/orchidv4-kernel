@@ -13,6 +13,9 @@ use std::rc::Rc;
 
 pub mod curator_control_port;
 
+#[cfg(test)]
+mod tests;
+
 pub struct Curator {
     pages: HashMap<String, Box<dyn PageControlPort>>,
     page_generator: Box<dyn PageGeneratorPort>,

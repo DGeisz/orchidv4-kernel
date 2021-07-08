@@ -1,4 +1,3 @@
-use mockall::predicate::*;
 use mockall::*;
 
 /// This port provides an interface that consumes

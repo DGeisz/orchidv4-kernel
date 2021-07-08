@@ -1,6 +1,5 @@
 use crate::kernel_io::ws_io::ws_command_adapter::ws_commands::WsCommand;
 use crate::kernel_io::ws_io::ws_command_adapter::ws_response::WsResponse;
-use mockall::predicate::*;
 use mockall::*;
 
 /// The ws command consumption port provides a port

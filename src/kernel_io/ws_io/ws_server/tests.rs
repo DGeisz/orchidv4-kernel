@@ -4,7 +4,7 @@ use crate::kernel_io::ws_io::ws_message_consumption_port::{
 use crate::kernel_io::ws_io::ws_server::run_server;
 use futures_util::{SinkExt, StreamExt};
 use log::info;
-use mockall::predicate::*;
+use mockall::predicate::eq;
 use std::sync::Arc;
 use tokio::sync::Barrier;
 use tokio::time::{sleep, Duration};
