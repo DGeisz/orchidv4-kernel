@@ -22,9 +22,6 @@ impl WsCommandAdapter {
 impl WsCommandConsumptionPort for WsCommandAdapter {
     fn consume_ws_command(&mut self, ws_command: WsCommand) -> (WsResponse, bool) {
         match ws_command {
-            /*
-            TODO: Test implementation of this command
-            */
             WsCommand::NewPage => {
                 /*
                 This is pretty simple.  Basically just instruct the curator
