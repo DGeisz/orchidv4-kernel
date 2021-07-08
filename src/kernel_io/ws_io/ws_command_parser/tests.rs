@@ -1,6 +1,6 @@
 use crate::kernel_io::ws_io::ws_command_adapter::ws_commands::WsCommand;
 use crate::kernel_io::ws_io::ws_command_adapter::ws_response::WsResponse;
-use crate::kernel_io::ws_io::ws_command_consumption_port::MockWsCommandConsumptionPort;
+use crate::kernel_io::ws_io::ws_command_consumption_port::mock_ws_command_consumption_port;
 use crate::kernel_io::ws_io::ws_command_parser::WsCommandParser;
 use crate::kernel_io::ws_io::ws_message_consumption_port::MessageConsumptionResponse;
 use mockall::predicate::eq;
@@ -19,7 +19,7 @@ fn test_new_page() {
     /*
     Create a mocked ws command consumption port
     */
-    let mut mocked_port = Box::new(MockWsCommandConsumptionPort::new());
+    let mut mocked_port = Box::new(mock_ws_command_consumption_port());
 
     let page_id = String::from("page_id");
     let pid_clone = page_id.clone();

@@ -1,5 +1,5 @@
 use crate::kernel_io::ws_io::ws_message_consumption_port::{
-    MessageConsumptionResponse, MockWsMessageConsumptionPort, WsMessageConsumptionPort,
+    mock_ws_message_consumption_port, MessageConsumptionResponse, WsMessageConsumptionPort,
 };
 use crate::kernel_io::ws_io::ws_server::run_server;
 use futures_util::{SinkExt, StreamExt};
@@ -235,7 +235,7 @@ async fn multi_client_test() {
 }
 
 pub fn create_ws_message_mock() -> Box<dyn WsMessageConsumptionPort> {
-    let mut mock = MockWsMessageConsumptionPort::new();
+    let mut mock = mock_ws_message_consumption_port();
 
     let req1 = String::from("FirstReq");
     let req2 = String::from("SecondReq");

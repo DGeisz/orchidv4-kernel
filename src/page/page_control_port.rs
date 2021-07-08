@@ -6,3 +6,7 @@ pub trait PageControlPort {
     /// Get a clone of the id of the page
     fn get_id(&self) -> String;
 }
+
+pub fn mock_page_control_port() -> MockPageControlPort {
+    MockPageControlPort::new()
+}

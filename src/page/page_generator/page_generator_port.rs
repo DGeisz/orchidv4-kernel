@@ -9,3 +9,7 @@ pub trait PageGeneratorPort {
     /// said page
     fn generate_page(&self) -> Box<dyn PageControlPort>;
 }
+
+pub fn mock_page_generator() -> MockPageGeneratorPort {
+    MockPageGeneratorPort::new()
+}

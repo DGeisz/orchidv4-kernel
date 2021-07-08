@@ -8,3 +8,7 @@ pub trait CuratorControlPort {
     /// Returns the id of the new page
     fn new_page(&mut self) -> String;
 }
+
+pub fn mock_curator_control_port() -> MockCuratorControlPort {
+    MockCuratorControlPort::new()
+}

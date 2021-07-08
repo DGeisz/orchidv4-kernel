@@ -11,6 +11,10 @@ pub trait WsMessageConsumptionPort {
     fn consume_ws_message(&mut self, message: String) -> MessageConsumptionResponse;
 }
 
+pub fn mock_ws_message_consumption_port() -> MockWsMessageConsumptionPort {
+    MockWsMessageConsumptionPort::new()
+}
+
 /// The response from a message consumer
 #[derive(Clone)]
 pub enum MessageConsumptionResponse {

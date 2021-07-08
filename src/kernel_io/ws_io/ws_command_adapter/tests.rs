@@ -1,4 +1,4 @@
-use crate::curator::curator_control_port::MockCuratorControlPort;
+use crate::curator::curator_control_port::mock_curator_control_port;
 use crate::kernel_io::ws_io::ws_command_adapter::ws_commands::WsCommand;
 use crate::kernel_io::ws_io::ws_command_adapter::ws_response::WsResponse;
 use crate::kernel_io::ws_io::ws_command_adapter::WsCommandAdapter;
@@ -10,7 +10,7 @@ fn test_new_page() {
     /*
     First let's create a mock of the curator control port
     */
-    let mut mock_port = Box::new(MockCuratorControlPort::new());
+    let mut mock_port = Box::new(mock_curator_control_port());
 
     /*
     Create the page id that we expect it to return

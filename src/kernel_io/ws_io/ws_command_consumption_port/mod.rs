@@ -14,3 +14,7 @@ pub trait WsCommandConsumptionPort {
     /// of the response
     fn consume_ws_command(&mut self, ws_command: WsCommand) -> (WsResponse, bool);
 }
+
+pub fn mock_ws_command_consumption_port() -> MockWsCommandConsumptionPort {
+    MockWsCommandConsumptionPort::new()
+}

@@ -1,14 +1,14 @@
 use crate::curator::Curator;
-use crate::page::page_control_port::MockPageControlPort;
-use crate::page::page_generator::page_generator_port::MockPageGeneratorPort;
+use crate::page::page_control_port::mock_page_control_port;
+use crate::page::page_generator::page_generator_port::mock_page_generator;
 
 #[test]
 pub fn test_new_page() {
     let page_id = String::from("page_id");
     let pid_clone = page_id.clone();
 
-    let mut mock_page_generator = Box::new(MockPageGeneratorPort::new());
-    let mut mock_page_control_port = Box::new(MockPageControlPort::new());
+    let mut mock_page_generator = Box::new(mock_page_generator());
+    let mut mock_page_control_port = Box::new(mock_page_control_port());
 
     mock_page_control_port
         .expect_get_id()
