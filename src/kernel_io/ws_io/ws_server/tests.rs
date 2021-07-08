@@ -72,7 +72,7 @@ async fn multi_client_test() {
         /*
         Same thing for second client
         */
-        let (ws2, _) = connect_async(url)
+        let (ws2, _) = connect_async(url.clone())
             .await
             .expect("Second client failed to connect");
 
@@ -87,6 +87,7 @@ async fn multi_client_test() {
         let bc2 = barrier.clone();
         let bc3 = barrier.clone();
         let bc4 = barrier.clone();
+        let bc5 = barrier.clone();
 
         /*
         Alright, let's handle reads and writes in their own processes.
@@ -115,6 +116,12 @@ async fn multi_client_test() {
                     panic!("Didn't receive text from client 1 second read");
                 }
 
+                bc1.wait().await;
+
+                /*
+                Wait for 3 to connect and make sure it's not getting any dregs
+                from past writes
+                */
                 bc1.wait().await;
 
                 /*
@@ -147,6 +154,12 @@ async fn multi_client_test() {
                     panic!("Didn't receive text from client 2 second read");
                 }
 
+                bc2.wait().await;
+
+                /*
+                Wait for 3 to connect and make sure it's not getting any dregs
+                from past writes
+                */
                 bc2.wait().await;
 
                 /*
@@ -185,6 +198,12 @@ async fn multi_client_test() {
                 bc3.wait().await;
 
                 /*
+                Wait for 3 to connect and make sure it's not getting any dregs
+                from past writes
+                */
+                bc3.wait().await;
+
+                /*
                 Wait for the no-op
                 */
 
@@ -208,6 +227,12 @@ async fn multi_client_test() {
 
                 bc4.wait().await;
 
+                /*
+                Wait for 3 to connect and make sure it's not getting any dregs
+                from past writes
+                */
+                bc4.wait().await;
+
                 ws2_write.send(Message::Text(no_op_req)).await.unwrap();
 
                 bc4.wait().await;
@@ -221,6 +246,37 @@ async fn multi_client_test() {
 
             c1j.unwrap();
             c2j.unwrap();
+        });
+
+        let client3_handle = tokio::spawn(async move {
+            bc5.wait().await;
+            bc5.wait().await;
+            bc5.wait().await;
+
+            let (ws3, _) = connect_async(url)
+                .await
+                .expect("Client 3 failed to connect");
+
+            let (_, mut ws3_read) = ws3.split();
+
+            /*
+            We're going to attempt to read from this socket, but if a simple timer finishes
+            faster, then we assume there weren't any new messages for us
+            */
+
+            let next_msg = ws3_read.next();
+
+            tokio::select! {
+                next = next_msg => {
+                    panic!("Third ws client got a message when one hadn't been sent");
+                }
+                _ = sleep(Duration::from_millis(100)) => {
+                    info!("No new messages for third client");
+                }
+            }
+
+            bc5.wait().await;
+            bc5.wait().await;
         });
 
         let (read, write) = tokio::join!(read_handle, write_handle);
