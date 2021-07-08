@@ -181,7 +181,14 @@ pub async fn handle_connection(
             */
             tokio::spawn(async move {
                 /*
-                Loop over changes to out_rx which is the channel we're
+                First we're going to mark the current value in the out receiver
+                as seen so we don't send out the last response (before this was
+                opened) on a new ws connection.
+                */
+                out_rx.borrow_and_update();
+
+                /*
+                Now loop over changes to out_rx which is the channel we're
                 watching for message consumer output
                 */
                 while out_rx.changed().await.is_ok() {
