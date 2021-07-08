@@ -25,14 +25,15 @@ pub enum WsCommand {
     Basic page commands
     */
     NewPage,
+    FullPage(SimplePageCommand),
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Eq, PartialEq, Debug)]
 pub struct SimplePageCommand {
-    page_id: String,
+    pub page_id: String,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Eq, PartialEq, Debug)]
 pub struct PageCommandWithContent {
     page_id: String,
     content: String,

@@ -1,9 +1,12 @@
 use crate::page::feature_tree::feature_socket::feature_socket_control_port::{FeatureSocketControlPort, RcFeatureSocketControl};
 use crate::page::feature_tree::feature_socket::feature_socket_generator::feature_socket_generator_port::RcFeatureSocketGenerator;
 use std::rc::Rc;
+use crate::page::feature_tree::feature_socket::feature_socket_serialization::FeatureSocketSerialization;
+use crate::page::feature_tree::feature::feature_serialization::FeatureSerialization;
 
 pub mod feature_socket_control_port;
 pub mod feature_socket_generator;
+pub mod feature_socket_serialization;
 
 /// A feature socket is a structure which
 /// holds/contains a single feature.
@@ -19,4 +22,8 @@ impl FeatureSocket {
     }
 }
 
-impl FeatureSocketControlPort for FeatureSocket {}
+impl FeatureSocketControlPort for FeatureSocket {
+    fn serialize(&self) -> FeatureSocketSerialization {
+        FeatureSocketSerialization::new(FeatureSerialization::None)
+    }
+}

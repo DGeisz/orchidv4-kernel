@@ -1,2 +1,2 @@
 pub mod feature_control_port;
-pub mod feature_generator;
+pub mod feature_serialization;

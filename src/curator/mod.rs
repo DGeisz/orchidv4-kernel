@@ -6,8 +6,10 @@ use crate::curator::curator_control_port::CuratorControlPort;
 use crate::page::feature_tree::feature_socket::feature_socket_generator::FeatureSocketGenerator;
 use crate::page::feature_tree::feature_tree_generator::FeatureTreeGenerator;
 use crate::page::page_control_port::PageControlPort;
+use crate::page::page_error::PageError;
 use crate::page::page_generator::page_generator_port::PageGeneratorPort;
 use crate::page::page_generator::PageGenerator;
+use crate::page::page_serialization::PageSerialization;
 use std::collections::HashMap;
 use std::rc::Rc;
 
@@ -38,6 +40,13 @@ impl CuratorControlPort for Curator {
         self.pages.insert(page_id.clone(), new_page);
 
         page_id
+    }
+
+    fn full_page(&self, page_id: String) -> Result<PageSerialization, PageError> {
+        match self.pages.get(&page_id) {
+            Some(page) => Ok(page.serialize()),
+            None => Err(PageError::PageNotFound(page_id)),
+        }
     }
 }
 

@@ -1,4 +1,5 @@
 use crate::kernel_io::ws_io::ws_command_adapter::ws_commands::WsCommand;
+use crate::kernel_io::ws_io::ws_command_adapter::ws_response::WsResponse;
 use crate::kernel_io::ws_io::ws_command_consumption_port::WsCommandConsumptionPort;
 use crate::kernel_io::ws_io::ws_message_consumption_port::{
     MessageConsumptionResponse, WsMessageConsumptionPort,
@@ -32,6 +33,14 @@ impl WsMessageConsumptionPort for WsCommandParser {
         match de_result {
             Ok(ws_command) => {
                 let (response, terminate) = self.command_consumer.consume_ws_command(ws_command);
+
+                /*
+                Check to see if the response is an error,
+                and if so, return none early
+                */
+                if let WsResponse::Error = &response {
+                    return MessageConsumptionResponse::None;
+                }
 
                 let ser_res = serde_json::to_string(&response).unwrap();
 

@@ -37,6 +37,12 @@ impl WsCommandConsumptionPort for WsCommandAdapter {
                 */
                 (WsResponse::NewPage { page_id }, false)
             }
+            WsCommand::FullPage(page_cmd) => {
+                match self.curator_controller.full_page(page_cmd.page_id) {
+                    Ok(page) => (WsResponse::FullPage { page }, false),
+                    Err(_) => (WsResponse::Error, false),
+                }
+            }
         }
     }
 }

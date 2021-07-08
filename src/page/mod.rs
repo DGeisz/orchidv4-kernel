@@ -3,11 +3,14 @@
 
 use crate::page::feature_tree::feature_tree_control_port::FeatureTreeControlPort;
 use crate::page::page_control_port::PageControlPort;
+use crate::page::page_serialization::PageSerialization;
 use uuid::Uuid;
 
 pub mod feature_tree;
 pub mod page_control_port;
+pub mod page_error;
 pub mod page_generator;
+pub mod page_serialization;
 mod term_tree;
 
 pub struct Page {
@@ -27,5 +30,9 @@ impl Page {
 impl PageControlPort for Page {
     fn get_id(&self) -> String {
         self.id.clone()
+    }
+
+    fn serialize(&self) -> PageSerialization {
+        PageSerialization::new(self.feature_tree_control.serialize())
     }
 }

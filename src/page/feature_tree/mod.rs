@@ -1,4 +1,5 @@
 use crate::page::feature_tree::feature_socket::feature_socket_control_port::RcFeatureSocketControl;
+use crate::page::feature_tree::feature_socket::feature_socket_serialization::FeatureSocketSerialization;
 use crate::page::feature_tree::feature_tree_control_port::FeatureTreeControlPort;
 
 mod feature;
@@ -18,4 +19,8 @@ impl FeatureTree {
     }
 }
 
-impl FeatureTreeControlPort for FeatureTree {}
+impl FeatureTreeControlPort for FeatureTree {
+    fn serialize(&self) -> FeatureSocketSerialization {
+        self.base_socket_control.serialize()
+    }
+}
