@@ -4,6 +4,7 @@ use crate::kernel_io::ws_io::ws_command_consumption_port::WsCommandConsumptionPo
 use crate::kernel_io::ws_io::ws_message_consumption_port::{
     MessageConsumptionResponse, WsMessageConsumptionPort,
 };
+use log::error;
 
 #[cfg(test)]
 mod tests;
@@ -29,6 +30,8 @@ impl WsMessageConsumptionPort for WsCommandParser {
         Attempt to deserialize the message
         */
         let de_result: Result<WsCommand, _> = serde_json::from_str(&message);
+
+        error!("This is result: {:?}", de_result);
 
         match de_result {
             Ok(ws_command) => {

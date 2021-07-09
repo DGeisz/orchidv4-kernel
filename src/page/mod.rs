@@ -33,6 +33,6 @@ impl PageControlPort for Page {
     }
 
     fn serialize(&self) -> PageSerialization {
-        PageSerialization::new(self.feature_tree_control.serialize())
+        PageSerialization::new(self.feature_tree_control.serialize(), self.get_id())
     }
 }

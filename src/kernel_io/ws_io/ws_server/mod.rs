@@ -46,9 +46,10 @@ pub async fn run_server(
     None once the channel is closed, hence the while let.
     */
     thread::spawn(move || {
+        let mut consumption_port = generate_consumption_port();
+
         while let Some(msg) = in_rx.blocking_recv() {
             info!("Received in orchid loop message: {}", msg);
-            let mut consumption_port = generate_consumption_port();
 
             /*
             Consume the message, and if the message produces an output

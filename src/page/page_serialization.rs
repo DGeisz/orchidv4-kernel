@@ -6,10 +6,14 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
 pub struct PageSerialization {
     feature_tree: FeatureSocketSerialization,
+    page_id: String,
 }
 
 impl PageSerialization {
-    pub fn new(feature_tree: FeatureSocketSerialization) -> PageSerialization {
-        PageSerialization { feature_tree }
+    pub fn new(feature_tree: FeatureSocketSerialization, page_id: String) -> PageSerialization {
+        PageSerialization {
+            feature_tree,
+            page_id,
+        }
     }
 }
