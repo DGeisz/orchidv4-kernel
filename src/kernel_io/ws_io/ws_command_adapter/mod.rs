@@ -43,6 +43,19 @@ impl WsCommandConsumptionPort for WsCommandAdapter {
                     Err(_) => (WsResponse::Error, false),
                 }
             }
+            WsCommand::CreateFeature {
+                page_id,
+                socket_id,
+                feature,
+            } => {
+                match self
+                    .curator_controller
+                    .create_feature(page_id, socket_id, feature)
+                {
+                    Ok(page) => (WsResponse::FullPage { page }, false),
+                    Err(_) => (WsResponse::Error, false),
+                }
+            }
         }
     }
 }

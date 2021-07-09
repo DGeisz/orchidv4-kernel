@@ -1,7 +1,9 @@
 //! A Page is the top-most container for actual orchid
 //! structures.  It corresponds to a single editor page
 
+use crate::page::feature_tree::feature::feature_enum::FeatureEnum;
 use crate::page::feature_tree::feature_tree_control_port::FeatureTreeControlPort;
+use crate::page::feature_tree::feature_tree_error::FeatureTreeError;
 use crate::page::page_control_port::PageControlPort;
 use crate::page::page_serialization::PageSerialization;
 use uuid::Uuid;
@@ -34,5 +36,13 @@ impl PageControlPort for Page {
 
     fn serialize(&self) -> PageSerialization {
         PageSerialization::new(self.feature_tree_control.serialize(), self.get_id())
+    }
+
+    fn create_feature(
+        &mut self,
+        socket_id: String,
+        feature: FeatureEnum,
+    ) -> Result<(), FeatureTreeError> {
+        self.feature_tree_control.create_feature(socket_id, feature)
     }
 }

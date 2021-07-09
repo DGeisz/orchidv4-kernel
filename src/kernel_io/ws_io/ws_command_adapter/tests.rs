@@ -40,3 +40,12 @@ fn test_new_page() {
     */
     assert_eq!(terminate, false);
 }
+
+/// Test full page f11y
+#[test]
+fn test_full_page() {
+    /*
+    TODO: Impl this bad boi
+    Create mock port
+    */
+}

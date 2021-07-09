@@ -1,3 +1,4 @@
+use crate::page::feature_tree::feature::feature_enum::FeatureEnum;
 use serde::{Deserialize, Serialize};
 
 /// This is a serializable command digestible by ws_io
@@ -26,6 +27,11 @@ pub enum WsCommand {
     */
     NewPage,
     FullPage(SimplePageCommand),
+    CreateFeature {
+        page_id: String,
+        socket_id: String,
+        feature: FeatureEnum,
+    },
 }
 
 #[derive(Deserialize, Serialize, Eq, PartialEq, Debug)]

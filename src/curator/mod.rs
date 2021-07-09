@@ -3,7 +3,7 @@
 //! behind a kernel_io module.  It contains all the pages that
 //! are actively loaded in-memory within the kernel
 use crate::curator::curator_control_port::CuratorControlPort;
-use crate::page::feature_tree::feature_socket::feature_socket_generator::FeatureSocketGenerator;
+use crate::page::feature_tree::feature::feature_enum::FeatureEnum;
 use crate::page::feature_tree::feature_tree_generator::FeatureTreeGenerator;
 use crate::page::page_control_port::PageControlPort;
 use crate::page::page_error::PageError;
@@ -48,6 +48,21 @@ impl CuratorControlPort for Curator {
             None => Err(PageError::PageNotFound(page_id)),
         }
     }
+
+    fn create_feature(
+        &mut self,
+        page_id: String,
+        socket_id: String,
+        feature: FeatureEnum,
+    ) -> Result<PageSerialization, PageError> {
+        match self.pages.get_mut(&page_id) {
+            Some(mut page) => match page.create_feature(socket_id, feature) {
+                Ok(_) => Ok(page.serialize()),
+                Err(e) => Err(PageError::FeatureError(e)),
+            },
+            None => Err(PageError::PageNotFound(page_id)),
+        }
+    }
 }
 
 /// We need a function that actually assembles a curator
@@ -55,10 +70,9 @@ impl CuratorControlPort for Curator {
 /// an external function from the curator because the curator
 /// should be agnostic about the implementation of its page generator
 pub fn assemble_kernel_curator() -> Box<dyn CuratorControlPort> {
-    let feature_socket_generator = FeatureSocketGenerator::new();
-    feature_socket_generator.init(Rc::clone(&feature_socket_generator));
+    let feature_tree_generator = FeatureTreeGenerator::new();
 
-    Curator::new(PageGenerator::new(FeatureTreeGenerator::new(
-        feature_socket_generator,
-    )))
+    feature_tree_generator.init(Rc::clone(&feature_tree_generator));
+
+    Curator::new(PageGenerator::new(feature_tree_generator))
 }
