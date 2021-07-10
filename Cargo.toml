@@ -10,6 +10,10 @@ edition = "2018"
 name = "ws_io"
 path = "src/bin/ws_kernel_io.rs"
 
+[[bin]]
+name = "play"
+path = "src/bin/play.rs"
+
 [dependencies]
 uuid = { version = "0.8.2", features = ["v4"]}
 tokio = { version = "1", features = ["full" ]}

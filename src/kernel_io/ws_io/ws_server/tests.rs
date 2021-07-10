@@ -14,6 +14,7 @@ use tokio_tungstenite::tungstenite::Message;
 /// This is a basic test of the server functionality.
 /// Spins up two websocket clients for communication
 #[tokio::test]
+#[ignore] // This is ignored just cause it takes forever to run
 async fn multi_client_test() {
     env_logger::init();
 

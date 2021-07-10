@@ -1,4 +1,5 @@
 /// Error that arise in the feature tree
+#[derive(Eq, PartialEq, Debug)]
 pub enum FeatureTreeError {
     /// Indicates the kernel tried to fill
     /// a feature socket that was already

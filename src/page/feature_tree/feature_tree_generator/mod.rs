@@ -5,9 +5,9 @@ use crate::page::feature_tree::feature_tree_generator::feature_tree_generator_po
     FeatureTreeGeneratorPort, RcFeatureTreeGenerator,
 };
 use crate::page::feature_tree::FeatureTree;
-use crate::utils::type_utils::Relltion;
+use crate::utils::type_utils::{Relltion, SelfRef};
 use std::cell::RefCell;
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 
 pub mod feature_tree_generator_port;
 
@@ -22,36 +22,31 @@ pub struct FeatureTreeGenerator {
     /// Note we unwrap self rc everywhere because
     /// init should be immediately called after creating
     /// this struct
-    self_rc: Relltion<RcFeatureTreeGenerator>,
+    self_ref: SelfRef<Box<dyn FeatureTreeGeneratorPort>>,
 }
 
 impl FeatureTreeGenerator {
     pub fn new() -> RcFeatureTreeGenerator {
-        Rc::new(Box::new(FeatureTreeGenerator {
-            self_rc: RefCell::new(None),
-        }))
-    }
+        let new: RcFeatureTreeGenerator = Rc::new(Box::new(FeatureTreeGenerator {
+            self_ref: SelfRef::new(),
+        }));
 
-    /// Creates a clone of itself for passing self references
-    /// to other structs that need to generate features
-    fn clone_self_rc(&self) -> RcFeatureTreeGenerator {
-        match &*self.self_rc.borrow() {
-            Some(generator) => Rc::clone(generator),
-            None => panic!("This feature tree generator hasn't been initialized yet"),
-        }
+        new.init(&new);
+
+        new
     }
 }
 
 impl FeatureTreeGeneratorPort for FeatureTreeGenerator {
-    fn init(&self, self_rc: RcFeatureTreeGenerator) {
-        *self.self_rc.borrow_mut() = Some(self_rc);
-    }
-
     fn generate_feature_tree(&self) -> Box<dyn FeatureTreeControlPort> {
         FeatureTree::new(self.generate_feature_socket())
     }
 
+    fn init(&self, self_ref: &RcFeatureTreeGenerator) {
+        self.self_ref.set_ref(&self_ref);
+    }
+
     fn generate_feature_socket(&self) -> RcFeatureSocketControl {
-        FeatureSocket::new(self.clone_self_rc())
+        FeatureSocket::new(self.self_ref.get_weak_ref())
     }
 }

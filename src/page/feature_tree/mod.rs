@@ -14,6 +14,9 @@ pub mod feature_tree_control_port;
 pub mod feature_tree_error;
 pub mod feature_tree_generator;
 
+#[cfg(test)]
+mod tests;
+
 pub struct FeatureTree {
     base_socket_control: RcFeatureSocketControl,
     socket_reference: HashMap<String, RcFeatureSocketControl>,

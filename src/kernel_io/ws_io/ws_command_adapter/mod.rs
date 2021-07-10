@@ -38,6 +38,10 @@ impl WsCommandConsumptionPort for WsCommandAdapter {
                 (WsResponse::NewPage { page_id }, false)
             }
             WsCommand::FullPage(page_cmd) => {
+                /*
+                Simply call full page command, and you should either
+                get back a full page serialization, or an error
+                */
                 match self.curator_controller.full_page(page_cmd.page_id) {
                     Ok(page) => (WsResponse::FullPage { page }, false),
                     Err(_) => (WsResponse::Error, false),

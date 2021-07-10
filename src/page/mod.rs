@@ -15,6 +15,9 @@ pub mod page_generator;
 pub mod page_serialization;
 mod term_tree;
 
+#[cfg(test)]
+mod tests;
+
 pub struct Page {
     id: String,
     feature_tree_control: Box<dyn FeatureTreeControlPort>,

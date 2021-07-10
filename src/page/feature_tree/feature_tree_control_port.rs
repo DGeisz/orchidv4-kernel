@@ -2,7 +2,9 @@ use crate::page::feature_tree::feature::feature_enum::FeatureEnum;
 use crate::page::feature_tree::feature_socket::feature_socket_serialization::FeatureSocketSerialization;
 use crate::page::feature_tree::feature_tree_error::FeatureTreeError;
 use crate::page::feature_tree::FeatureTree;
+use mockall::*;
 
+#[automock]
 pub trait FeatureTreeControlPort {
     /// Serialize the entire feature tree
     /// into a representation digestible by clients
@@ -14,4 +16,8 @@ pub trait FeatureTreeControlPort {
         socket_id: String,
         feature: FeatureEnum,
     ) -> Result<(), FeatureTreeError>;
+}
+
+pub fn mock_feature_tree_control_port() -> MockFeatureTreeControlPort {
+    MockFeatureTreeControlPort::new()
 }

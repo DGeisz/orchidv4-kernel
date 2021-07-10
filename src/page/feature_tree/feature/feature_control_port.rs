@@ -1,4 +1,5 @@
 use crate::page::feature_tree::feature_socket::feature_socket_control_port::RcFeatureSocketControl;
+use crate::utils::type_utils::WeakRef;
 use std::rc::Rc;
 
 pub trait FeatureControlPort {
@@ -11,3 +12,4 @@ pub trait FeatureControlPort {
 }
 
 pub type RcFeatureControl = Rc<Box<dyn FeatureControlPort>>;
+pub type WeakFeatureControl = WeakRef<Box<dyn FeatureControlPort>>;

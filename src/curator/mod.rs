@@ -72,7 +72,5 @@ impl CuratorControlPort for Curator {
 pub fn assemble_kernel_curator() -> Box<dyn CuratorControlPort> {
     let feature_tree_generator = FeatureTreeGenerator::new();
 
-    feature_tree_generator.init(Rc::clone(&feature_tree_generator));
-
     Curator::new(PageGenerator::new(feature_tree_generator))
 }
