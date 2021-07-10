@@ -5,12 +5,14 @@ use serde::{Deserialize, Serialize};
 /// sent to FE clients
 #[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
 pub struct FeatureSocketSerialization {
-    feature: FeatureSerialization,
+    feature: Box<FeatureSerialization>,
 }
 
 impl FeatureSocketSerialization {
     /// Creates a new feature socket serialization
     pub fn new(feature: FeatureSerialization) -> FeatureSocketSerialization {
-        FeatureSocketSerialization { feature }
+        FeatureSocketSerialization {
+            feature: Box::new(feature),
+        }
     }
 }

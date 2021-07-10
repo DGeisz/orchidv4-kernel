@@ -11,7 +11,7 @@ use crate::page::feature_tree::feature_tree_error::FeatureTreeError;
 use crate::page::feature_tree::feature_tree_generator::feature_tree_generator_port::{
     FeatureTreeGeneratorPort, RcFeatureTreeGenerator, WeakFeatureTreeGenerator,
 };
-use crate::utils::type_utils::{Relltion, SelfRef, WeakRef};
+use crate::utils::type_utils::{HardRef, SoftRef, WeakRef};
 use std::cell::RefCell;
 use std::io::Read;
 use std::rc::Rc;
@@ -25,29 +25,19 @@ pub mod feature_socket_serialization;
 pub struct FeatureSocket {
     id: String,
     feature_tree_generator: WeakFeatureTreeGenerator,
-    self_ref: SelfRef<Box<dyn FeatureSocketControlPort>>,
-    parent_weak: Option<WeakFeatureControl>,
+    self_ref: SoftRef<Box<dyn FeatureSocketControlPort>>,
+    parent_feature: SoftRef<Box<dyn FeatureControlPort>>,
+    feature: HardRef<Box<dyn FeatureControlPort>>,
 }
 
 impl FeatureSocket {
     pub fn new(feature_tree_generator: WeakFeatureTreeGenerator) -> RcFeatureSocketControl {
-        Rc::new(Box::new(FeatureSocket {
-            id: Uuid::new_v4().to_hyphenated().to_string(),
-            feature_tree_generator,
-            self_ref: SelfRef::new(),
-            parent_weak: None,
-        }))
-    }
-
-    pub fn new_with_parent(
-        feature_tree_generator: WeakFeatureTreeGenerator,
-        parent_weak: WeakFeatureControl,
-    ) -> RcFeatureSocketControl {
         let new: RcFeatureSocketControl = Rc::new(Box::new(FeatureSocket {
             id: Uuid::new_v4().to_hyphenated().to_string(),
             feature_tree_generator,
-            self_ref: SelfRef::new(),
-            parent_weak: Some(parent_weak),
+            self_ref: SoftRef::new(),
+            parent_feature: SoftRef::new(),
+            feature: HardRef::new(),
         }));
 
         new.init(&new);
@@ -68,8 +58,32 @@ impl FeatureSocketControlPort for FeatureSocket {
         self.self_ref.set_ref(self_ref);
     }
 
+    fn set_parent_ref(&self, parent_feature: &RcFeatureControl) {
+        self.parent_feature.set_ref(parent_feature);
+    }
+
     fn create_feature(&self, feature: FeatureEnum) -> Result<RcFeatureControl, FeatureTreeError> {
-        unimplemented!()
+        /*
+        First let's check to be sure our socket isn't even full
+        */
+        if !self.feature.ref_set() {
+            return Err(FeatureTreeError::SocketAlreadyFilled(self.get_id()));
+        }
+
+        match feature {
+            FeatureEnum::Universal => {
+                /* Create the feature */
+                let feature = self
+                    .feature_tree_generator
+                    .get()
+                    .generate_universal_feature(self.self_ref.get_weak_ref());
+
+                /* Set this feature as this socket's feature */
+                self.feature.set_ref(Rc::clone(&feature));
+
+                Ok(feature)
+            }
+        }
     }
 
     fn get_id(&self) -> String {

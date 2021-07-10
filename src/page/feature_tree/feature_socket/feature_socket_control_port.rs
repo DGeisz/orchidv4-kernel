@@ -24,6 +24,9 @@ pub trait FeatureSocketControlPort {
     /// only be used internally
     fn init(&self, self_ref: &RcFeatureSocketControl);
 
+    /// Set parent ref
+    fn set_parent_ref(&self, parent_feature: &RcFeatureControl);
+
     /// Attempts to create and fill this socket
     /// with a new feature
     fn create_feature(&self, feature: FeatureEnum) -> Result<RcFeatureControl, FeatureTreeError>;

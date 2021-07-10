@@ -1,11 +1,15 @@
-use crate::page::feature_tree::feature_socket::feature_socket_control_port::RcFeatureSocketControl;
+use crate::page::feature_tree::feature::feature_control_port::RcFeatureControl;
+use crate::page::feature_tree::feature::features::universal::Universal;
+use crate::page::feature_tree::feature_socket::feature_socket_control_port::{
+    RcFeatureSocketControl, WeakFeatureSocketControl,
+};
 use crate::page::feature_tree::feature_socket::FeatureSocket;
 use crate::page::feature_tree::feature_tree_control_port::FeatureTreeControlPort;
 use crate::page::feature_tree::feature_tree_generator::feature_tree_generator_port::{
     FeatureTreeGeneratorPort, RcFeatureTreeGenerator,
 };
 use crate::page::feature_tree::FeatureTree;
-use crate::utils::type_utils::{Relltion, SelfRef};
+use crate::utils::type_utils::SoftRef;
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
@@ -22,13 +26,13 @@ pub struct FeatureTreeGenerator {
     /// Note we unwrap self rc everywhere because
     /// init should be immediately called after creating
     /// this struct
-    self_ref: SelfRef<Box<dyn FeatureTreeGeneratorPort>>,
+    self_ref: SoftRef<Box<dyn FeatureTreeGeneratorPort>>,
 }
 
 impl FeatureTreeGenerator {
     pub fn new() -> RcFeatureTreeGenerator {
         let new: RcFeatureTreeGenerator = Rc::new(Box::new(FeatureTreeGenerator {
-            self_ref: SelfRef::new(),
+            self_ref: SoftRef::new(),
         }));
 
         new.init(&new);
@@ -48,5 +52,12 @@ impl FeatureTreeGeneratorPort for FeatureTreeGenerator {
 
     fn generate_feature_socket(&self) -> RcFeatureSocketControl {
         FeatureSocket::new(self.self_ref.get_weak_ref())
+    }
+
+    fn generate_universal_feature(
+        &self,
+        parent_socket: WeakFeatureSocketControl,
+    ) -> RcFeatureControl {
+        Universal::new(parent_socket, self.self_ref.get_weak_ref())
     }
 }

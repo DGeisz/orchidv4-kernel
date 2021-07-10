@@ -1,6 +1,9 @@
 //! Port used by feature tree generators
 
-use crate::page::feature_tree::feature_socket::feature_socket_control_port::RcFeatureSocketControl;
+use crate::page::feature_tree::feature::feature_control_port::RcFeatureControl;
+use crate::page::feature_tree::feature_socket::feature_socket_control_port::{
+    RcFeatureSocketControl, WeakFeatureSocketControl,
+};
 use crate::page::feature_tree::feature_tree_control_port::FeatureTreeControlPort;
 use crate::utils::type_utils::WeakRef;
 use std::rc::{Rc, Weak};
@@ -26,4 +29,10 @@ pub trait FeatureTreeGeneratorPort {
 
     /// Creates a new feature socket
     fn generate_feature_socket(&self) -> RcFeatureSocketControl;
+
+    /// Creates a new universal feature
+    fn generate_universal_feature(
+        &self,
+        parent_socket: WeakFeatureSocketControl,
+    ) -> RcFeatureControl;
 }
