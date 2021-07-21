@@ -69,11 +69,11 @@ impl<T> SoftRef<T> {
     }
 }
 
-pub struct WeakRef<T> {
+pub struct WeakRef<T: ?Sized> {
     weak_ref: Weak<T>,
 }
 
-impl<T> WeakRef<T> {
+impl<T: ?Sized> WeakRef<T> {
     pub fn get(&self) -> Rc<T> {
         Weak::upgrade(&self.weak_ref).unwrap()
     }
