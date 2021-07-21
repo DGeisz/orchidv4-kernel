@@ -1,13 +1,9 @@
-use crate::kernel_io::ws_io::ws_command_adapter::ws_commands::WsCommand;
-use crate::kernel_io::ws_io::ws_command_adapter::ws_response::WsResponse;
+use crate::kernel_io::ws_io::ws_command_consumption_port::ws_commands::WsCommand;
 use crate::kernel_io::ws_io::ws_command_consumption_port::WsCommandConsumptionPort;
 use crate::kernel_io::ws_io::ws_message_consumption_port::{
     MessageConsumptionResponse, WsMessageConsumptionPort,
 };
 use log::error;
-
-#[cfg(test)]
-mod tests;
 
 /// The struct that attempts to parse
 /// the raw text from websocket messages
@@ -40,10 +36,11 @@ impl WsMessageConsumptionPort for WsCommandParser {
                 /*
                 Check to see if the response is an error,
                 and if so, return none early
+                TODO: Uncomment this when it's not an irrefutable pattern
                 */
-                if let WsResponse::Error = &response {
-                    return MessageConsumptionResponse::None;
-                }
+                // if let WsResponse::Error = &response {
+                //     return MessageConsumptionResponse::None;
+                // }
 
                 let ser_res = serde_json::to_string(&response).unwrap();
 
