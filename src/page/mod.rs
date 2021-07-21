@@ -18,6 +18,7 @@ mod term_tree;
 #[cfg(test)]
 mod tests;
 
+/// I'm about to nuke this
 pub struct Page {
     id: String,
     feature_tree_control: Box<dyn FeatureTreeControlPort>,
