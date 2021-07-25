@@ -1,5 +1,6 @@
 use crate::block_tree::block::block_binding::BlockBinding;
 use crate::block_tree::block::block_generator::block_generator_control::BlockGeneratorControl;
+use crate::block_tree::block::block_request::BlockRequest;
 use crate::block_tree::block::bottom::BindingBottom;
 use crate::block_tree::block::top::BindingTop;
 use crate::block_tree::block_tree_control::BlockTreeControl;
@@ -20,7 +21,7 @@ struct BlockTree {
 impl BlockTreeControl for BlockTree {
     fn create_and_append(
         &self,
-        block_request: String,
+        block_request: BlockRequest,
         bottom_id: u128,
     ) -> Result<BlockTreeDiff, BlockTreeError> {
         /*
@@ -42,32 +43,25 @@ impl BlockTreeControl for BlockTree {
         }
 
         /*
-        Next, determine if the block request corresponds to a predefined block
+        Next, attempt to use the block generator and the current bottom
+        to create a compatible block for this space
         */
-        let block_binding_top = match self.block_generator.generate_block(&block_request) {
+        let block_binding_top = match self
+            .block_generator
+            .generate_block(&block_request, &binding_bottom)
+        {
             Some(top) => top,
             None => {
                 /*
-                If not, ask the Bottom if it recognizes the sequence, and can produce
-                a block that would be compatible
+                If the block generator didn't find anything, then the request
+                isn't compatible
                 */
-                match binding_bottom.generate_compatible_block(&block_request) {
-                    Some(top) => top,
-                    None => return Err(BlockTreeError::BadBlockRequest(block_request)),
-                }
+                return Err(BlockTreeError::RequestNotCompatible(
+                    block_request,
+                    bottom_id,
+                ));
             }
         };
-
-        /*
-        Now check if the bottom and top are
-        compatible before binding them
-        */
-        if !binding_bottom.is_compatible_with(&block_binding_top) {
-            return Err(BlockTreeError::RequestNotCompatible(
-                block_request,
-                bottom_id,
-            ));
-        }
 
         /*
         Now assume we have the new block.  Or a reference to the bottom
@@ -87,7 +81,7 @@ impl BlockTreeControl for BlockTree {
 
     fn create_and_insert(
         &self,
-        block_request: String,
+        block_request: BlockRequest,
         bottom_id: u128,
         rebind_to_first: bool,
     ) -> Result<BlockTreeDiff, BlockTreeError> {
@@ -111,17 +105,20 @@ impl BlockTreeControl for BlockTree {
         /*
         Next, determine if the block request corresponds to a predefined block
         */
-        let new_binding_top = match self.block_generator.generate_block(&block_request) {
+        let new_binding_top = match self
+            .block_generator
+            .generate_block(&block_request, &old_binding_bottom)
+        {
             Some(top) => top,
             None => {
                 /*
-                If not, ask the Bottom if it recognizes the sequence, and can produce
-                a block that would be compatible
+                If the block generator didn't find anything, then the request
+                isn't compatible
                 */
-                match old_binding_bottom.generate_compatible_block(&block_request) {
-                    Some(top) => top,
-                    None => return Err(BlockTreeError::BadBlockRequest(block_request)),
-                }
+                return Err(BlockTreeError::RequestNotCompatible(
+                    block_request,
+                    bottom_id,
+                ));
             }
         };
 
@@ -167,12 +164,12 @@ impl BlockTreeControl for BlockTree {
         Now see if branch and new block are compatible
         */
         if !new_binding_bottom.is_compatible_with(&old_binding_top) {
-            BlockBinding::bind(&old_binding_top, &old_binding_bottom);
-
             /*
             If not, rebind all the old pair, and indicate
             there was an error
             */
+            BlockBinding::bind(&old_binding_top, &old_binding_bottom);
+
             return Err(BlockTreeError::RequestNotCompatible(
                 block_request,
                 bottom_id,
@@ -184,7 +181,7 @@ impl BlockTreeControl for BlockTree {
         */
         BlockBinding::bind(&old_binding_top, &new_binding_bottom);
 
-        Ok(BlockTreeDiff::Append(
+        Ok(BlockTreeDiff::Replace(
             bottom_id,
             new_binding_top.serialize(),
         ))
@@ -214,5 +211,69 @@ impl BlockTreeControl for BlockTree {
         was detached
         */
         Ok(BlockTreeDiff::Detach(bottom_id))
+    }
+
+    fn remove_and_rebind(
+        &self,
+        bottom_id: u128,
+        rebind_to_first: bool,
+    ) -> Result<BlockTreeDiff, BlockTreeError> {
+        /*
+        First find the Bottom to which this request refers.
+        Make sure the bottom isn't already bound
+        */
+        let lower_bottom = if let Some(lower_bottom) = self.base_bottom.get_bottom_by_id(bottom_id)
+        {
+            lower_bottom
+        } else {
+            return Err(BlockTreeError::BottomNotFound(bottom_id));
+        };
+
+        /*
+        Get the top to which the bottom corresponds
+        */
+        let lower_top = if let Some(top) = lower_bottom.get_bound_top() {
+            top
+        } else {
+            return Err(BlockTreeError::BottomAlreadyDetached(bottom_id));
+        };
+
+        /*
+        Get the bottom whose top we're attempting bind to
+        */
+        let upper_bottom_option = if rebind_to_first {
+            lower_top.first_unbound_bottom()
+        } else {
+            lower_top.last_unbound_bottom()
+        };
+
+        let upper_bottom = if let Some(bottom) = upper_bottom_option {
+            bottom
+        } else {
+            return Err(BlockTreeError::NoUpperBlockFoundForRebind);
+        };
+
+        /*
+        Now attempt to get the top to which upper_bottom is presumably bound to
+        */
+        let upper_top = if let Some(top) = upper_bottom.get_bound_top() {
+            top
+        } else {
+            return Err(BlockTreeError::NoUpperBlockFoundForRebind);
+        };
+
+        /*
+        See if lower bottom and upper top are compatible.  If not, we can't do the rebind.
+        */
+        if !lower_bottom.is_compatible_with(&upper_top) {
+            return Err(BlockTreeError::RebindIncompatible);
+        }
+
+        /*
+        Otherwise, bind lower bottom with upper top, and return the replacement
+        */
+        BlockBinding::bind(&upper_top, &lower_bottom);
+
+        Ok(BlockTreeDiff::Rebind(bottom_id, upper_top.get_id()))
     }
 }

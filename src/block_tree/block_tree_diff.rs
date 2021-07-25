@@ -4,4 +4,5 @@ pub enum BlockTreeDiff {
     Append(u128, BlockSerialization),
     Replace(u128, BlockSerialization),
     Detach(u128),
+    Rebind(u128, u128),
 }
