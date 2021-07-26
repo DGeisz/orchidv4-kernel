@@ -36,11 +36,11 @@ impl<T> HardRef<T> {
     }
 }
 
-pub struct SoftRef<T> {
+pub struct SoftRef<T: ?Sized> {
     soft_ref: RefCell<Option<Weak<T>>>,
 }
 
-impl<T> SoftRef<T> {
+impl<T: ?Sized> SoftRef<T> {
     pub fn new() -> SoftRef<T> {
         SoftRef {
             soft_ref: RefCell::new(None),
