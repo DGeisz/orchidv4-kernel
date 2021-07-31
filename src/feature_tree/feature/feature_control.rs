@@ -11,11 +11,11 @@ pub trait FeatureControl {
 
     fn get_self_weak(&self) -> WeakRef<dyn FeatureControl>;
 
-    fn set_binding(&self, binding: Rc<dyn FeatureBindingControl>);
+    fn set_binding(&self, binding: &Rc<dyn FeatureBindingControl>);
 
     fn get_socket_by_id(&self, socket_id: u128) -> Option<Rc<dyn SocketControl>>;
 
-    fn get_socket(&self) -> Option<Rc<dyn SocketControl>>;
+    fn get_parent_socket(&self) -> Option<Rc<dyn SocketControl>>;
 
     fn serialize(&self) -> FeatureSerialization;
 

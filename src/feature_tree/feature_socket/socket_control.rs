@@ -11,7 +11,7 @@ pub trait SocketControl {
 
     fn get_self_weak(&self) -> WeakRef<dyn SocketControl>;
 
-    fn set_binding(&self, binding: Rc<dyn FeatureBindingControl>);
+    fn set_binding(&self, binding: &Rc<dyn FeatureBindingControl>);
 
     fn detach(&self) -> Result<(), FeatureTreeError>;
 

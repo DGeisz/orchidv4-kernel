@@ -199,18 +199,27 @@ impl FeatureTreeControl for FeatureTree {
         socket_id: u128,
         rebind_to_first: bool,
     ) -> Result<FeatureTreeDiff, FeatureTreeError> {
+        /*
+        First get the lower socket
+        */
         let lower_socket = if let Some(socket) = self.base_socket.get_socket_by_id(socket_id) {
             socket
         } else {
             return Err(FeatureTreeError::SocketNotFound(socket_id));
         };
 
+        /*
+        Get the feature in the socket, error if there isn't one
+        */
         let lower_feature = if let Some(feature) = lower_socket.get_feature() {
             feature
         } else {
             return Err(FeatureTreeError::SocketAlreadyEmpty(socket_id));
         };
 
+        /*
+        Get the upper socket associated with lower feature (based on rebind to first)
+        */
         let upper_socket_option = if rebind_to_first {
             lower_feature.first_unbound_socket()
         } else {
@@ -223,16 +232,27 @@ impl FeatureTreeControl for FeatureTree {
             return Err(FeatureTreeError::NoUpperFeatureFoundForRebind);
         };
 
+        /*
+        Get the upper feature in the socket
+        */
         let upper_feature = if let Some(feature) = upper_socket.get_feature() {
             feature
         } else {
             return Err(FeatureTreeError::NoUpperFeatureFoundForRebind);
         };
 
+        /*
+        Make sure the lower socket and upper feature
+        are compatible
+        */
         if !lower_socket.is_compatible_with(&upper_feature) {
             return Err(FeatureTreeError::RebindIncompatible);
         }
 
+        /*
+        If so, bind the upper feature and lower socket
+        (which also will deallocate the deleted feature)
+        */
         FeatureBinding::bind(&upper_feature, &lower_socket);
 
         Ok(FeatureTreeDiff::Rebind(socket_id, upper_feature.get_id()))

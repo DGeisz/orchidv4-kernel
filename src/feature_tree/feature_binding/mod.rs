@@ -18,8 +18,8 @@ impl FeatureBinding {
             socket: socket.get_self_weak(),
         });
 
-        socket.set_binding(Rc::clone(&binding));
-        feature.set_binding(binding);
+        socket.set_binding(&binding);
+        feature.set_binding(&binding);
     }
 }
 
