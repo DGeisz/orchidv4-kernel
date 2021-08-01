@@ -28,7 +28,7 @@ impl FeatureBindingControl for FeatureBinding {
         Rc::clone(&self.feature)
     }
 
-    fn get_bottom_ref(&self) -> Rc<dyn SocketControl> {
+    fn get_socket_ref(&self) -> Rc<dyn SocketControl> {
         self.socket.get()
     }
 }

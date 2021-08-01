@@ -10,4 +10,5 @@ pub enum FeatureTreeError {
     NewFeatureDoesNotHaveEmptySockets(FeatureRequest, u128),
     NoUpperFeatureFoundForRebind,
     RebindIncompatible,
+    ChildFeatureInUse(u128),
 }
