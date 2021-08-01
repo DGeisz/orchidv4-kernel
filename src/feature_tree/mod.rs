@@ -15,6 +15,7 @@ pub mod feature_tree_control;
 pub mod feature_tree_diff;
 pub mod feature_tree_error;
 pub mod feature_type;
+pub mod feature_utils;
 
 struct FeatureTree {
     base_socket: Rc<dyn SocketControl>,
