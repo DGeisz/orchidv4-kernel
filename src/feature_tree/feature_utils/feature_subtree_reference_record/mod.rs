@@ -24,8 +24,8 @@ impl FeatureSubtreeRefRecord {
         let mut ref_counts = self.ref_count_of_subtree_features.clone();
         let mut feature_refs = self.feature_refs_in_subtree.clone();
 
-        for (ref_id, ref_count) in &ref_counts {
-            if let Some(num_feature_refs) = feature_refs.get(ref_id) {
+        for (ref_id, ref_count) in &self.ref_count_of_subtree_features {
+            if let Some(num_feature_refs) = self.feature_refs_in_subtree.get(ref_id) {
                 if num_feature_refs >= ref_count {
                     ref_counts.remove(ref_id);
                     feature_refs.remove(ref_id);
@@ -38,8 +38,24 @@ impl FeatureSubtreeRefRecord {
 
         FeatureSubtreeRefRecord {
             ref_count_of_subtree_features: ref_counts,
-            feature_refs_in_subtree,
+            feature_refs_in_subtree: feature_refs,
         }
+    }
+
+    pub fn add_ref_count(&mut self, feature_id: u128, ref_count: u32) {
+        if ref_count > 0 {
+            self.ref_count_of_subtree_features
+                .insert(feature_id, ref_count);
+        }
+    }
+
+    pub fn add_feature_ref(&mut self, feature_id: u128) {
+        let current_count = self.feature_refs_in_subtree.get(&feature_id);
+
+        match current_count {
+            Some(count) => self.feature_refs_in_subtree.insert(feature_id, count + 1),
+            None => self.feature_refs_in_subtree.insert(feature_id, 1),
+        };
     }
 
     pub fn reconcile(&self, other: &FeatureSubtreeRefRecord) -> FeatureSubtreeRefRecord {
@@ -63,9 +79,11 @@ impl FeatureSubtreeRefRecord {
 
         for (id, count) in &other.feature_refs_in_subtree {
             match new_ref_record.feature_refs_in_subtree.get(id) {
-                Some(old_count) => new_ref_record
-                    .feature_refs_in_subtree
-                    .insert(id.clone(), old_count + count),
+                Some(old_count) => {
+                    new_ref_record
+                        .feature_refs_in_subtree
+                        .insert(id.clone(), old_count + count);
+                }
                 None => {
                     new_ref_record
                         .feature_refs_in_subtree

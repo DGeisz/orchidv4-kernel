@@ -9,7 +9,7 @@ pub enum FeatureSerialization {
     Map {
         map: Box<FeatureSerialization>,
         map_latex: MapLatex,
-        arg_latex: Vec<Box<FeatureSerialization>>,
+        arg_latex: Box<FeatureSerialization>,
     },
     Tuple {
         children: Vec<Box<FeatureSerialization>>,

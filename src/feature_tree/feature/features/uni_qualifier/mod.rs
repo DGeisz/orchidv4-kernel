@@ -1,3 +1,5 @@
+//! Universal Qualifier
+
 use crate::feature_tree::feature::feature_control::FeatureControl;
 use crate::feature_tree::feature::feature_serialization::{FeatureSerialization, MapLatex};
 use crate::feature_tree::feature_binding::feature_binding_control::FeatureBindingControl;
@@ -10,34 +12,30 @@ use std::cell::Cell;
 use std::rc::Rc;
 use xxhash_rust::xxh3::xxh3_128;
 
-const CP_MAP_ID: u128 = 1001;
+const UNI_MAP_ID: u128 = 1002;
 
-pub struct CpStatement {
+pub struct UniQualifier {
     id: u128,
     self_ref: SoftRef<dyn FeatureControl>,
     parent_binding: SoftRef<dyn FeatureBindingControl>,
-    c_socket: Rc<dyn SocketControl>,
-    p_socket: Rc<dyn SocketControl>,
+    cp_socket: Rc<dyn SocketControl>,
     ref_count: Cell<u32>,
 }
 
-impl FeatureControl for CpStatement {
+impl FeatureControl for UniQualifier {
     fn get_id(&self) -> u128 {
         self.id
     }
 
     fn get_hash(&self) -> Option<u128> {
-        match (self.c_socket.get_hash(), self.p_socket.get_hash()) {
-            (Some(c_hash), Some(p_hash)) => {
-                /*Start with map id, and mix in socket hashes*/
-                let mut input = CP_MAP_ID.to_be_bytes().to_vec();
-
-                input.append(&mut c_hash.to_be_bytes().to_vec());
-                input.append(&mut p_hash.to_be_bytes().to_vec());
+        match self.cp_socket.get_hash() {
+            Some(cp_hash) => {
+                let mut input = UNI_MAP_ID.to_be_bytes().to_vec();
+                input.append(&mut cp_hash.to_be_bytes().to_vec());
 
                 Some(xxh3_128(&input))
             }
-            _ => None,
+            None => None,
         }
     }
 
@@ -54,13 +52,7 @@ impl FeatureControl for CpStatement {
     }
 
     fn get_socket_by_id(&self, socket_id: u128) -> Option<Rc<dyn SocketControl>> {
-        if let Some(socket) = self.c_socket.get_socket_by_id(socket_id) {
-            Some(socket)
-        } else if let Some(socket) = self.p_socket.get_socket_by_id(socket_id) {
-            Some(socket)
-        } else {
-            None
-        }
+        self.cp_socket.get_socket_by_id(socket_id)
     }
 
     fn get_parent_socket(&self) -> Option<Rc<dyn SocketControl>> {
@@ -73,25 +65,20 @@ impl FeatureControl for CpStatement {
     fn serialize(&self) -> FeatureSerialization {
         FeatureSerialization::Map {
             map: Box::new(FeatureSerialization::Leaf {
-                id: CP_MAP_ID,
-                latex: "CP".to_string(),
+                id: UNI_MAP_ID,
+                latex: "∀".to_string(),
             }),
             map_latex: MapLatex::Basic,
-            arg_latex: Box::new(FeatureSerialization::Tuple {
-                children: vec![
-                    Box::new(self.c_socket.serialize()),
-                    Box::new(self.p_socket.serialize()),
-                ],
-            }),
+            arg_latex: Box::new(self.cp_socket.serialize()),
         }
     }
 
     fn first_unbound_socket(&self) -> Option<Rc<dyn SocketControl>> {
-        Some(Rc::clone(&self.c_socket))
+        Some(Rc::clone(&self.cp_socket))
     }
 
     fn last_unbound_socket(&self) -> Option<Rc<dyn SocketControl>> {
-        Some(Rc::clone(&self.p_socket))
+        Some(Rc::clone(&self.cp_socket))
     }
 
     fn is_feature_compatible_with_child_socket(
@@ -100,35 +87,36 @@ impl FeatureControl for CpStatement {
         socket_id: u128,
     ) -> bool {
         /*
-        First make sure this socket is actually a child
+        First make sure we're talking about our child socket,
+        and make sure the feature is compatible with the statement type
         */
-        if socket_id == self.c_socket.get_id() || socket_id == self.p_socket.get_id() {
+        if socket_id == self.cp_socket.get_id() && feature.is_compatible_with_type(STATEMENT_TYPE) {
             /*
-            The only requirement for these sockets is
-            that the feature be of type boolean
+            Now let's see if this feature returns something in get_cp_sockets
             */
-            return feature.is_compatible_with_type(BOOLEAN_TYPE);
+            if let (Some(_), Some(_)) = feature.get_cp_sockets() {
+                /*
+                That's all we need
+                */
+                return true;
+            }
         }
 
-        /*
-        Otherwise, we don't know what the socket is, so
-        automatically return false
-        */
         false
     }
 
     fn is_compatible_with_type(&self, feature_type: FeatureType) -> bool {
         /*
-        First see if the type is statement type, because
-        this sucker is definitely a statement
+        First see if the type is boolean type,
+        as this is def a boolean
         */
-        if feature_type == STATEMENT_TYPE {
+        if feature_type == BOOLEAN_TYPE {
             return true;
         }
 
         /*
-        If not, check in the rest of the tree if this particular
-        statement is in fact compatible with the given type
+        If not, let's check the rest of the tree to see if
+        this feature is secretly compatible with the given type
         */
         if let Some(hash) = self.get_hash() {
             if let Some(parent) = self.get_parent_socket() {
@@ -137,7 +125,7 @@ impl FeatureControl for CpStatement {
         }
 
         /*
-        Otherwise, the type is incompatible
+        Otherwise, this bad boi is incompatible
         */
         false
     }
@@ -149,28 +137,10 @@ impl FeatureControl for CpStatement {
         request_source: u128,
     ) -> bool {
         /*
-        If the request if coming from the p_socket, we can
-        pass it to the c_socket
+        If the request is coming from cp_socket,
+        then pass the request up the tree
         */
-        if request_source == self.p_socket.get_id() {
-            /*
-            We only return true.  If it's false, we continue
-            with the function, which will necessarily check the parent
-            */
-            if self.p_socket.is_feature_compatible_with_type(
-                feature_hash,
-                feature_type.clone(),
-                self.get_id(),
-            ) {
-                return true;
-            }
-        }
-
-        /*
-        If the request is coming from child sockets, then we pass the request
-        up the tree
-        */
-        if request_source == self.c_socket.get_id() || request_source == self.p_socket.get_id() {
+        if request_source == self.cp_socket.get_id() {
             if let Some(parent) = self.get_parent_socket() {
                 return parent.is_feature_compatible_with_type(
                     feature_hash,
@@ -181,8 +151,8 @@ impl FeatureControl for CpStatement {
         }
 
         /*
-        Otherwise, we return false because neither cp_statement
-        is in the validity scope of a feature higher in the tree
+        Otherwise we return false because we can't pass
+        the request down the tree
         */
         false
     }
@@ -200,24 +170,13 @@ impl FeatureControl for CpStatement {
     }
 
     fn get_subtree_ref_record(&self) -> FeatureSubtreeRefRecord {
-        let mut ref_record = self
-            .c_socket
-            .get_subtree_ref_record()
-            .reconcile(&self.p_socket.get_subtree_ref_record());
-
+        let mut ref_record = self.cp_socket.get_subtree_ref_record();
         let ref_count = self.get_ref_count();
 
         if ref_count > 0 {
-            ref_record.add_ref_count(self.get_id(), self.get_ref_count());
+            ref_record.add_ref_count(self.get_id(), self.get_ref_count())
         }
 
         ref_record
-    }
-
-    fn get_cp_sockets(&self) -> (Option<Rc<dyn SocketControl>>, Option<Rc<dyn SocketControl>>) {
-        (
-            Some(Rc::clone(&self.c_socket)),
-            Some(Rc::clone(&self.p_socket)),
-        )
     }
 }
