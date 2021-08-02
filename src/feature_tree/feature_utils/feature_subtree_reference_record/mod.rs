@@ -78,9 +78,9 @@ impl FeatureSubtreeRefRecord {
         new_ref_record.fully_reduce()
     }
 
-    pub fn any_external_references(&self) -> bool {
+    pub fn any_external_dependents(&self) -> bool {
         let full_reduction = self.fully_reduce();
 
-        self.ref_count_of_subtree_features.is_empty() && self.feature_refs_in_subtree.is_empty()
+        !full_reduction.ref_count_of_subtree_features.is_empty()
     }
 }

@@ -1,13 +1,16 @@
 use crate::feature_tree::feature::feature_control::FeatureControl;
-use crate::feature_tree::feature::feature_serialization::FeatureSerialization;
+use crate::feature_tree::feature::feature_serialization::{FeatureSerialization, MapLatex};
 use crate::feature_tree::feature_binding::feature_binding_control::FeatureBindingControl;
 use crate::feature_tree::feature_socket::socket_control::SocketControl;
 use crate::feature_tree::feature_type::built_in_types::{BOOLEAN_TYPE, STATEMENT_TYPE};
 use crate::feature_tree::feature_type::FeatureType;
+use crate::feature_tree::feature_utils::feature_subtree_reference_record::FeatureSubtreeRefRecord;
 use crate::utils::type_utils::{SoftRef, WeakRef};
 use std::cell::Cell;
 use std::rc::Rc;
 use xxhash_rust::xxh3::xxh3_128;
+
+const CP_MAP_ID: u128 = 1001;
 
 pub struct CpStatement {
     id: u128,
@@ -65,11 +68,17 @@ impl FeatureControl for CpStatement {
     }
 
     fn serialize(&self) -> FeatureSerialization {
-        unimplemented!()
-    }
-
-    fn can_detach(&self) -> bool {
-        unimplemented!()
+        FeatureSerialization::Map {
+            map: Box::new(FeatureSerialization::Leaf {
+                id: CP_MAP_ID,
+                latex: "CP".to_string(),
+            }),
+            map_latex: MapLatex::Basic,
+            arg_latex: vec![
+                Box::new(self.c_socket.serialize()),
+                Box::new(self.p_socket.serialize()),
+            ],
+        }
     }
 
     fn first_unbound_socket(&self) -> Option<Rc<dyn SocketControl>> {
@@ -97,7 +106,8 @@ impl FeatureControl for CpStatement {
         }
 
         /*
-        In all other situations, the feature is incompatible
+        Otherwise, we don't know what the socket is, so
+        automatically return false
         */
         false
     }
@@ -155,26 +165,24 @@ impl FeatureControl for CpStatement {
     }
 
     fn inc_ref_count(&self) {
-        let count = self.get_ref_count();
-
-        self.ref_count.replace(count + 1);
+        self.ref_count.replace(self.get_ref_count() + 1);
     }
 
     fn dec_ref_count(&self) {
-        let count = self.get_ref_count();
-
-        self.ref_count.replace(count - 1);
+        self.ref_count.replace(self.get_ref_count() - 1);
     }
 
     fn get_ref_count(&self) -> u32 {
         self.ref_count.get()
     }
 
-    fn any_refs_in_subtree(&self) -> bool {
-        if self.get_ref_count() > 0 {
-            true
-        } else {
-            self.c_socket.any_refs_in_subtree() || self.p_socket.any_refs_in_subtree()
-        }
+    fn get_subtree_ref_record(&self) -> FeatureSubtreeRefRecord {
+        self.c_socket
+            .get_subtree_ref_record()
+            .reconcile(&self.p_socket.get_subtree_ref_record())
+    }
+
+    fn any_external_subtree_dependents(&self) -> bool {
+        self.get_subtree_ref_record().any_external_dependents()
     }
 }

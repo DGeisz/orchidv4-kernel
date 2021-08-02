@@ -2,6 +2,7 @@ use crate::feature_tree::feature::feature_serialization::FeatureSerialization;
 use crate::feature_tree::feature_binding::feature_binding_control::FeatureBindingControl;
 use crate::feature_tree::feature_socket::socket_control::SocketControl;
 use crate::feature_tree::feature_type::FeatureType;
+use crate::feature_tree::feature_utils::feature_subtree_reference_record::FeatureSubtreeRefRecord;
 use crate::utils::type_utils::WeakRef;
 use std::rc::Rc;
 
@@ -21,8 +22,6 @@ pub trait FeatureControl {
     fn get_parent_socket(&self) -> Option<Rc<dyn SocketControl>>;
 
     fn serialize(&self) -> FeatureSerialization;
-
-    fn can_detach(&self) -> bool;
 
     fn first_unbound_socket(&self) -> Option<Rc<dyn SocketControl>>;
 
@@ -50,5 +49,7 @@ pub trait FeatureControl {
     fn dec_ref_count(&self);
     fn get_ref_count(&self) -> u32;
 
-    fn any_refs_in_subtree(&self) -> bool;
+    fn get_subtree_ref_record(&self) -> FeatureSubtreeRefRecord;
+
+    fn any_external_subtree_dependents(&self) -> bool;
 }

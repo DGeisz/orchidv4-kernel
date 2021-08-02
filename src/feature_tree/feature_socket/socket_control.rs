@@ -1,7 +1,9 @@
 use crate::feature_tree::feature::feature_control::FeatureControl;
+use crate::feature_tree::feature::feature_serialization::FeatureSerialization;
 use crate::feature_tree::feature_binding::feature_binding_control::FeatureBindingControl;
 use crate::feature_tree::feature_tree_error::FeatureTreeError;
 use crate::feature_tree::feature_type::FeatureType;
+use crate::feature_tree::feature_utils::feature_subtree_reference_record::FeatureSubtreeRefRecord;
 use crate::utils::type_utils::WeakRef;
 use std::rc::Rc;
 
@@ -25,7 +27,7 @@ pub trait SocketControl {
 
     fn detach(&self) -> Result<(), FeatureTreeError> {
         if let Some(feature) = self.get_feature() {
-            if feature.any_refs_in_subtree() {
+            if !feature.any_external_subtree_dependents() {
                 self.release_binding();
 
                 Ok(())
@@ -96,5 +98,12 @@ pub trait SocketControl {
         false
     }
 
-    fn any_refs_in_subtree(&self) -> bool;
+    fn get_subtree_ref_record(&self) -> FeatureSubtreeRefRecord;
+
+    fn serialize(&self) -> FeatureSerialization {
+        match self.get_feature() {
+            Some(feature) => feature.serialize(),
+            None => FeatureSerialization::Incomplete,
+        }
+    }
 }
