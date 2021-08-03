@@ -3,12 +3,10 @@ use crate::feature_tree::feature::feature_control::FeatureControl;
 use crate::feature_tree::feature::feature_serialization::{
     FeatureSerialization, MapLatex, SocketSerialization,
 };
-use crate::feature_tree::feature::features::feature_ids::CONJUNCTION_MAP_ID;
+use crate::feature_tree::feature::features::feature_ids::TYPE_MAP_ID;
 use crate::feature_tree::feature_binding::feature_binding_control::FeatureBindingControl;
 use crate::feature_tree::feature_socket::socket_control::SocketControl;
-use crate::feature_tree::feature_type::built_in_types::{
-    gen_map_term, BASE_SCOPE, BOOLEAN_TERM_ID, BOOLEAN_TYPE,
-};
+use crate::feature_tree::feature_type::built_in_types::{BASE_SCOPE, BOOLEAN_TYPE};
 use crate::feature_tree::feature_type::{FeatureType, TypeHierarchyAnchor};
 use crate::feature_tree::feature_utils::feature_subtree_reference_record::FeatureSubtreeRefRecord;
 use crate::utils::type_utils::{SoftRef, WeakRef};
@@ -16,28 +14,28 @@ use std::cell::Cell;
 use std::rc::Rc;
 use xxhash_rust::xxh3::xxh3_128;
 
-pub struct Conjunction {
+pub struct TypeMap {
     id: u128,
     self_ref: SoftRef<dyn FeatureControl>,
     parent_binding: SoftRef<dyn FeatureBindingControl>,
-    socket_1: Rc<dyn SocketControl>,
-    socket_2: Rc<dyn SocketControl>,
+    term_socket: Rc<dyn SocketControl>,
+    type_socket: Rc<dyn SocketControl>,
     ref_count: Cell<u32>,
 }
 
-impl FeatureControl for Conjunction {
+impl FeatureControl for TypeMap {
     fn get_id(&self) -> u128 {
         self.id
     }
 
     fn get_hash(&self) -> Option<u128> {
-        match (self.socket_1.get_hash(), self.socket_2.get_hash()) {
-            (Some(hash_1), Some(hash_2)) => {
+        match (self.term_socket.get_hash(), self.type_socket.get_hash()) {
+            (Some(term_hash), Some(type_hash)) => {
                 /*Start with map id, and mix in socket hashes*/
-                let mut input = CONJUNCTION_MAP_ID.to_be_bytes().to_vec();
+                let mut input = TYPE_MAP_ID.to_be_bytes().to_vec();
 
-                input.append(&mut hash_1.to_be_bytes().to_vec());
-                input.append(&mut hash_2.to_be_bytes().to_vec());
+                input.append(&mut term_hash.to_be_bytes().to_vec());
+                input.append(&mut type_hash.to_be_bytes().to_vec());
 
                 Some(xxh3_128(&input))
             }
@@ -58,9 +56,9 @@ impl FeatureControl for Conjunction {
     }
 
     fn get_socket_by_id(&self, socket_id: u128) -> Option<Rc<dyn SocketControl>> {
-        if let Some(socket) = self.socket_1.get_socket_by_id(socket_id) {
+        if let Some(socket) = self.term_socket.get_socket_by_id(socket_id) {
             Some(socket)
-        } else if let Some(socket) = self.socket_2.get_socket_by_id(socket_id) {
+        } else if let Some(socket) = self.type_socket.get_socket_by_id(socket_id) {
             Some(socket)
         } else {
             None
@@ -78,31 +76,31 @@ impl FeatureControl for Conjunction {
         FeatureSerialization::Map {
             map: Box::new(SocketSerialization::new(
                 /* Give the inaccessible socket the same id as the actual map */
-                CONJUNCTION_MAP_ID,
+                TYPE_MAP_ID,
                 Some(FeatureSerialization::Leaf {
-                    id: CONJUNCTION_MAP_ID,
-                    latex: "∧".to_string(),
+                    id: TYPE_MAP_ID,
+                    latex: ":".to_string(),
                 }),
             )),
             map_latex: MapLatex::MultiSource(
-                vec![String::new(), " ∧ ".to_string(), String::new()],
+                vec![String::new(), " : ".to_string(), String::new()],
                 vec![0, 1],
             ),
             arg: Box::new(FeatureSerialization::Tuple {
                 children: vec![
-                    Box::new(self.socket_1.serialize()),
-                    Box::new(self.socket_2.serialize()),
+                    Box::new(self.term_socket.serialize()),
+                    Box::new(self.type_socket.serialize()),
                 ],
             }),
         }
     }
 
     fn first_unbound_socket(&self) -> Option<Rc<dyn SocketControl>> {
-        Some(Rc::clone(&self.socket_1))
+        Some(Rc::clone(&self.term_socket))
     }
 
     fn last_unbound_socket(&self) -> Option<Rc<dyn SocketControl>> {
-        Some(Rc::clone(&self.socket_2))
+        Some(Rc::clone(&self.type_socket))
     }
 
     fn is_feature_compatible_with_child_socket(
@@ -111,15 +109,15 @@ impl FeatureControl for Conjunction {
         socket_id: u128,
     ) -> bool {
         /*
-        First make sure socket is actually a child
-        */
-        if socket_id == self.socket_1.get_id() || socket_id == self.socket_2.get_id() {
-            return feature.is_compatible_with_type(BOOLEAN_TYPE);
-        }
+        Ok, so if the socket if the term socket, what do I need?
 
-        /*
-        Otherwise, we don't know what the socket is, so return false
+        I want to ensure that the feature in the term socket is compatible
+        with the type socket as its type superior
         */
+        if socket_id == self.term_socket.get_id() {}
+
+        if socket_id == self.type_socket.get_id() {}
+
         false
     }
 
@@ -154,60 +152,26 @@ impl FeatureControl for Conjunction {
         feature_type: FeatureType,
         request_source: u128,
     ) -> bool {
-        /*
-        If the request is coming from the second socket, we can
-        pass it to the first socket because the first socket
-        is also in the validity scope
-        */
-        if request_source == self.socket_2.get_id() {
-            /*
-            Only return true from this block.  If it's
-            false we pass request up to parent in the next block
-            */
-            if self.socket_1.is_feature_compatible_with_type(
-                feature_hash,
-                feature_type.clone(),
-                self.get_id(),
-            ) {
-                return true;
-            }
-        }
-
-        /*
-        Now get the parent, because what happens next won't work without it
-        */
         if let Some(parent) = self.get_parent_socket() {
-            /*
-            If request is coming from child sockets, and we already checked with
-            socket_1 (if that's even and option, pass the request to the parent
-            */
-            if request_source == self.socket_1.get_id() || request_source == self.socket_2.get_id()
+            if request_source == self.term_socket.get_id()
+                || request_source == self.type_socket.get_id()
+                || request_source == parent.get_id()
             {
-                return parent.is_feature_compatible_with_type(
-                    feature_hash,
-                    feature_type,
-                    self.get_id(),
-                );
+                if let Some(type_feature) = self.type_socket.get_feature() {
+                    if let (Some(term_hash), Some(type_type)) =
+                        (self.term_socket.get_hash(), type_feature.as_type())
+                    {
+                        if feature_hash == term_hash && type_type == feature_type {
+                            return true;
+                        }
+                    }
+                }
             }
 
-            /*
-            If the request if coming from the parent, then we forward it
-            to the second socket
-            */
-            if request_source == parent.get_id() {
-                return self.socket_2.is_feature_compatible_with_type(
-                    feature_hash,
-                    feature_type,
-                    self.get_id(),
-                );
-            }
+            parent.is_feature_compatible_with_type(feature_hash, feature_type, self.get_id())
+        } else {
+            false
         }
-
-        /*
-        Otherwise, we either don't have a parent or
-        any relation to the request source, so it's false
-        */
-        false
     }
 
     fn inc_ref_count(&self) {
@@ -224,9 +188,9 @@ impl FeatureControl for Conjunction {
 
     fn get_subtree_ref_record(&self) -> FeatureSubtreeRefRecord {
         let mut ref_record = self
-            .socket_1
+            .term_socket
             .get_subtree_ref_record()
-            .reconcile(&self.socket_2.get_subtree_ref_record());
+            .reconcile(&self.type_socket.get_subtree_ref_record());
 
         let ref_count = self.get_ref_count();
 
@@ -246,14 +210,14 @@ impl FeatureControl for Conjunction {
     }
 
     fn to_compact(&self) -> Option<CompactFeature> {
-        if let (Some(compact_1), Some(compact_2)) =
-            (self.socket_1.to_compact(), self.socket_2.to_compact())
+        if let (Some(term_compact), Some(type_compact)) =
+            (self.term_socket.to_compact(), self.type_socket.to_compact())
         {
             Some(CompactFeature::Map {
-                map: Box::new(CompactFeature::Leaf(CONJUNCTION_MAP_ID)),
+                map: Box::new(CompactFeature::Leaf(TYPE_MAP_ID)),
                 arg: Box::new(CompactFeature::Tuple(vec![
-                    Box::new(compact_1),
-                    Box::new(compact_2),
+                    Box::new(term_compact),
+                    Box::new(type_compact),
                 ])),
             })
         } else {

@@ -1,7 +1,8 @@
+use crate::feature_tree::compact_feature::CompactFeature;
 use crate::feature_tree::feature::feature_serialization::FeatureSerialization;
 use crate::feature_tree::feature_binding::feature_binding_control::FeatureBindingControl;
 use crate::feature_tree::feature_socket::socket_control::SocketControl;
-use crate::feature_tree::feature_type::FeatureType;
+use crate::feature_tree::feature_type::{FeatureType, TypeHierarchyAnchor};
 use crate::feature_tree::feature_utils::feature_subtree_reference_record::FeatureSubtreeRefRecord;
 use crate::utils::type_utils::WeakRef;
 use std::rc::Rc;
@@ -9,17 +10,17 @@ use std::rc::Rc;
 pub trait FeatureControl {
     fn get_id(&self) -> u128;
 
-    fn get_hash(&self) -> Option<u128>;
-
     fn get_self_ref(&self) -> Rc<dyn FeatureControl>;
 
     fn get_self_weak(&self) -> WeakRef<dyn FeatureControl>;
 
+    fn get_parent_socket(&self) -> Option<Rc<dyn SocketControl>>;
+
     fn set_binding(&self, binding: &Rc<dyn FeatureBindingControl>);
 
-    fn get_socket_by_id(&self, socket_id: u128) -> Option<Rc<dyn SocketControl>>;
+    fn get_hash(&self) -> Option<u128>;
 
-    fn get_parent_socket(&self) -> Option<Rc<dyn SocketControl>>;
+    fn get_socket_by_id(&self, socket_id: u128) -> Option<Rc<dyn SocketControl>>;
 
     fn serialize(&self) -> FeatureSerialization;
 
@@ -53,5 +54,22 @@ pub trait FeatureControl {
 
     fn any_external_subtree_dependents(&self) -> bool {
         self.get_subtree_ref_record().any_external_dependents()
+    }
+
+    fn get_hierarchy_level(&self) -> i16;
+
+    fn get_hierarchy_anchor(&self) -> TypeHierarchyAnchor;
+
+    fn to_compact(&self) -> Option<CompactFeature>;
+
+    fn as_type(&self) -> Option<FeatureType> {
+        match self.to_compact() {
+            Some(compact) => Some(FeatureType::new(
+                compact,
+                self.get_hierarchy_anchor(),
+                self.get_hierarchy_level(),
+            )),
+            None => None,
+        }
     }
 }

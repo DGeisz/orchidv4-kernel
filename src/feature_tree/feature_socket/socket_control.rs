@@ -1,3 +1,4 @@
+use crate::feature_tree::compact_feature::CompactFeature;
 use crate::feature_tree::feature::feature_control::FeatureControl;
 use crate::feature_tree::feature::feature_serialization::{
     FeatureSerialization, SocketSerialization,
@@ -110,5 +111,12 @@ pub trait SocketControl {
                 None => None,
             },
         )
+    }
+
+    fn to_compact(&self) -> Option<CompactFeature> {
+        match self.get_feature() {
+            Some(feature) => feature.to_compact(),
+            None => None,
+        }
     }
 }

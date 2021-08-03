@@ -1,3 +1,4 @@
+use crate::feature_tree::compact_feature::CompactFeature;
 use crate::feature_tree::feature::feature_control::FeatureControl;
 use crate::feature_tree::feature::feature_serialization::{
     FeatureSerialization, MapLatex, SocketSerialization,
@@ -5,8 +6,10 @@ use crate::feature_tree::feature::feature_serialization::{
 use crate::feature_tree::feature::features::feature_ids::CONDI_MAP_ID;
 use crate::feature_tree::feature_binding::feature_binding_control::FeatureBindingControl;
 use crate::feature_tree::feature_socket::socket_control::SocketControl;
-use crate::feature_tree::feature_type::built_in_types::BOOLEAN_TYPE;
-use crate::feature_tree::feature_type::FeatureType;
+use crate::feature_tree::feature_type::built_in_types::{
+    gen_map_term, BASE_SCOPE, BOOLEAN_TERM_ID, BOOLEAN_TYPE,
+};
+use crate::feature_tree::feature_type::{FeatureType, TypeHierarchyAnchor};
 use crate::feature_tree::feature_utils::feature_subtree_reference_record::FeatureSubtreeRefRecord;
 use crate::utils::type_utils::{SoftRef, WeakRef};
 use std::cell::Cell;
@@ -216,5 +219,29 @@ impl FeatureControl for Conditional {
         }
 
         ref_record
+    }
+
+    fn get_hierarchy_level(&self) -> i16 {
+        0
+    }
+
+    fn get_hierarchy_anchor(&self) -> TypeHierarchyAnchor {
+        TypeHierarchyAnchor::ScopeRelative(BASE_SCOPE)
+    }
+
+    fn to_compact(&self) -> Option<CompactFeature> {
+        if let (Some(c_compact), Some(p_compact)) =
+            (self.c_socket.to_compact(), self.p_socket.to_compact())
+        {
+            Some(CompactFeature::Map {
+                map: Box::new(CompactFeature::Leaf(CONDI_MAP_ID)),
+                arg: Box::new(CompactFeature::Tuple(vec![
+                    Box::new(c_compact),
+                    Box::new(p_compact),
+                ])),
+            })
+        } else {
+            None
+        }
     }
 }

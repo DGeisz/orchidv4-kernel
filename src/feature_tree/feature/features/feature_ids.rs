@@ -4,3 +4,4 @@ pub const EXI_MAP_ID: u128 = 1003;
 pub const CONDI_MAP_ID: u128 = 1004;
 pub const CONJUNCTION_MAP_ID: u128 = 1005;
 pub const DISJUNCTION_MAP_ID: u128 = 1006;
+pub const TYPE_MAP_ID: u128 = 1007;
