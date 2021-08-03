@@ -54,10 +54,4 @@ pub trait FeatureControl {
     fn any_external_subtree_dependents(&self) -> bool {
         self.get_subtree_ref_record().any_external_dependents()
     }
-
-    /* --- FEATURE SPECIFIC METHODS --- */
-
-    fn get_cp_sockets(&self) -> (Option<Rc<dyn SocketControl>>, Option<Rc<dyn SocketControl>>) {
-        (None, None)
-    }
 }

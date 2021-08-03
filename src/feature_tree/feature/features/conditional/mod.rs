@@ -1,8 +1,9 @@
 use crate::feature_tree::feature::feature_control::FeatureControl;
 use crate::feature_tree::feature::feature_serialization::{FeatureSerialization, MapLatex};
+use crate::feature_tree::feature::features::feature_ids::CONDI_MAP_ID;
 use crate::feature_tree::feature_binding::feature_binding_control::FeatureBindingControl;
 use crate::feature_tree::feature_socket::socket_control::SocketControl;
-use crate::feature_tree::feature_type::built_in_types::{BOOLEAN_TYPE, STATEMENT_TYPE};
+use crate::feature_tree::feature_type::built_in_types::BOOLEAN_TYPE;
 use crate::feature_tree::feature_type::FeatureType;
 use crate::feature_tree::feature_utils::feature_subtree_reference_record::FeatureSubtreeRefRecord;
 use crate::utils::type_utils::{SoftRef, WeakRef};
@@ -10,9 +11,7 @@ use std::cell::Cell;
 use std::rc::Rc;
 use xxhash_rust::xxh3::xxh3_128;
 
-const CP_MAP_ID: u128 = 1001;
-
-pub struct CpStatement {
+pub struct Conditional {
     id: u128,
     self_ref: SoftRef<dyn FeatureControl>,
     parent_binding: SoftRef<dyn FeatureBindingControl>,
@@ -21,7 +20,7 @@ pub struct CpStatement {
     ref_count: Cell<u32>,
 }
 
-impl FeatureControl for CpStatement {
+impl FeatureControl for Conditional {
     fn get_id(&self) -> u128 {
         self.id
     }
@@ -30,7 +29,7 @@ impl FeatureControl for CpStatement {
         match (self.c_socket.get_hash(), self.p_socket.get_hash()) {
             (Some(c_hash), Some(p_hash)) => {
                 /*Start with map id, and mix in socket hashes*/
-                let mut input = CP_MAP_ID.to_be_bytes().to_vec();
+                let mut input = CONDI_MAP_ID.to_be_bytes().to_vec();
 
                 input.append(&mut c_hash.to_be_bytes().to_vec());
                 input.append(&mut p_hash.to_be_bytes().to_vec());
@@ -73,8 +72,8 @@ impl FeatureControl for CpStatement {
     fn serialize(&self) -> FeatureSerialization {
         FeatureSerialization::Map {
             map: Box::new(FeatureSerialization::Leaf {
-                id: CP_MAP_ID,
-                latex: "CP".to_string(),
+                id: CONDI_MAP_ID,
+                latex: "⇒".to_string(),
             }),
             map_latex: MapLatex::Basic,
             arg_latex: Box::new(FeatureSerialization::Tuple {
@@ -122,7 +121,7 @@ impl FeatureControl for CpStatement {
         First see if the type is statement type, because
         this sucker is definitely a statement
         */
-        if feature_type == STATEMENT_TYPE {
+        if feature_type == BOOLEAN_TYPE {
             return true;
         }
 
@@ -212,12 +211,5 @@ impl FeatureControl for CpStatement {
         }
 
         ref_record
-    }
-
-    fn get_cp_sockets(&self) -> (Option<Rc<dyn SocketControl>>, Option<Rc<dyn SocketControl>>) {
-        (
-            Some(Rc::clone(&self.c_socket)),
-            Some(Rc::clone(&self.p_socket)),
-        )
     }
 }

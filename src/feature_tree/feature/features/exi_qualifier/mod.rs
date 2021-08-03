@@ -1,8 +1,6 @@
-//! Universal Qualifier
-
 use crate::feature_tree::feature::feature_control::FeatureControl;
 use crate::feature_tree::feature::feature_serialization::{FeatureSerialization, MapLatex};
-use crate::feature_tree::feature::features::feature_ids::UNI_MAP_ID;
+use crate::feature_tree::feature::features::feature_ids::EXI_MAP_ID;
 use crate::feature_tree::feature_binding::feature_binding_control::FeatureBindingControl;
 use crate::feature_tree::feature_socket::socket_control::SocketControl;
 use crate::feature_tree::feature_type::built_in_types::BOOLEAN_TYPE;
@@ -13,7 +11,7 @@ use std::cell::Cell;
 use std::rc::Rc;
 use xxhash_rust::xxh3::xxh3_128;
 
-pub struct UniQualifier {
+pub struct ExiQualifier {
     id: u128,
     self_ref: SoftRef<dyn FeatureControl>,
     parent_binding: SoftRef<dyn FeatureBindingControl>,
@@ -22,7 +20,7 @@ pub struct UniQualifier {
     ref_count: Cell<u32>,
 }
 
-impl FeatureControl for UniQualifier {
+impl FeatureControl for ExiQualifier {
     fn get_id(&self) -> u128 {
         self.id
     }
@@ -31,7 +29,7 @@ impl FeatureControl for UniQualifier {
         match (self.c_socket.get_hash(), self.p_socket.get_hash()) {
             (Some(c_hash), Some(p_hash)) => {
                 /*Start with map id, and mix in socket hashes*/
-                let mut input = UNI_MAP_ID.to_be_bytes().to_vec();
+                let mut input = EXI_MAP_ID.to_be_bytes().to_vec();
 
                 input.append(&mut c_hash.to_be_bytes().to_vec());
                 input.append(&mut p_hash.to_be_bytes().to_vec());
@@ -74,8 +72,8 @@ impl FeatureControl for UniQualifier {
     fn serialize(&self) -> FeatureSerialization {
         FeatureSerialization::Map {
             map: Box::new(FeatureSerialization::Leaf {
-                id: UNI_MAP_ID,
-                latex: "∀".to_string(),
+                id: EXI_MAP_ID,
+                latex: "∃".to_string(),
             }),
             map_latex: MapLatex::Basic,
             arg_latex: Box::new(FeatureSerialization::Tuple {
