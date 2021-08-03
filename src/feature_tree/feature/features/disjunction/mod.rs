@@ -1,10 +1,8 @@
-//! Universal Qualifier
-
 use crate::feature_tree::feature::feature_control::FeatureControl;
 use crate::feature_tree::feature::feature_serialization::{
     FeatureSerialization, MapLatex, SocketSerialization,
 };
-use crate::feature_tree::feature::features::feature_ids::UNI_MAP_ID;
+use crate::feature_tree::feature::features::feature_ids::DISJUNCTION_MAP_ID;
 use crate::feature_tree::feature_binding::feature_binding_control::FeatureBindingControl;
 use crate::feature_tree::feature_socket::socket_control::SocketControl;
 use crate::feature_tree::feature_type::built_in_types::BOOLEAN_TYPE;
@@ -15,28 +13,28 @@ use std::cell::Cell;
 use std::rc::Rc;
 use xxhash_rust::xxh3::xxh3_128;
 
-pub struct UniQualifier {
+pub struct Disjunction {
     id: u128,
     self_ref: SoftRef<dyn FeatureControl>,
     parent_binding: SoftRef<dyn FeatureBindingControl>,
-    c_socket: Rc<dyn SocketControl>,
-    p_socket: Rc<dyn SocketControl>,
+    socket_1: Rc<dyn SocketControl>,
+    socket_2: Rc<dyn SocketControl>,
     ref_count: Cell<u32>,
 }
 
-impl FeatureControl for UniQualifier {
+impl FeatureControl for Disjunction {
     fn get_id(&self) -> u128 {
         self.id
     }
 
     fn get_hash(&self) -> Option<u128> {
-        match (self.c_socket.get_hash(), self.p_socket.get_hash()) {
-            (Some(c_hash), Some(p_hash)) => {
+        match (self.socket_1.get_hash(), self.socket_2.get_hash()) {
+            (Some(hash_1), Some(hash_2)) => {
                 /*Start with map id, and mix in socket hashes*/
-                let mut input = UNI_MAP_ID.to_be_bytes().to_vec();
+                let mut input = DISJUNCTION_MAP_ID.to_be_bytes().to_vec();
 
-                input.append(&mut c_hash.to_be_bytes().to_vec());
-                input.append(&mut p_hash.to_be_bytes().to_vec());
+                input.append(&mut hash_1.to_be_bytes().to_vec());
+                input.append(&mut hash_2.to_be_bytes().to_vec());
 
                 Some(xxh3_128(&input))
             }
@@ -57,9 +55,9 @@ impl FeatureControl for UniQualifier {
     }
 
     fn get_socket_by_id(&self, socket_id: u128) -> Option<Rc<dyn SocketControl>> {
-        if let Some(socket) = self.c_socket.get_socket_by_id(socket_id) {
+        if let Some(socket) = self.socket_1.get_socket_by_id(socket_id) {
             Some(socket)
-        } else if let Some(socket) = self.p_socket.get_socket_by_id(socket_id) {
+        } else if let Some(socket) = self.socket_2.get_socket_by_id(socket_id) {
             Some(socket)
         } else {
             None
@@ -76,28 +74,32 @@ impl FeatureControl for UniQualifier {
     fn serialize(&self) -> FeatureSerialization {
         FeatureSerialization::Map {
             map: Box::new(SocketSerialization::new(
-                UNI_MAP_ID,
+                /* Give the inaccessible socket the same id as the actual map */
+                DISJUNCTION_MAP_ID,
                 Some(FeatureSerialization::Leaf {
-                    id: UNI_MAP_ID,
-                    latex: "∀".to_string(),
+                    id: DISJUNCTION_MAP_ID,
+                    latex: "∨".to_string(),
                 }),
             )),
-            map_latex: MapLatex::Basic,
+            map_latex: MapLatex::MultiSource(
+                vec![String::new(), " ∨ ".to_string(), String::new()],
+                vec![0, 1],
+            ),
             arg: Box::new(FeatureSerialization::Tuple {
                 children: vec![
-                    Box::new(self.c_socket.serialize()),
-                    Box::new(self.p_socket.serialize()),
+                    Box::new(self.socket_1.serialize()),
+                    Box::new(self.socket_2.serialize()),
                 ],
             }),
         }
     }
 
     fn first_unbound_socket(&self) -> Option<Rc<dyn SocketControl>> {
-        Some(Rc::clone(&self.c_socket))
+        Some(Rc::clone(&self.socket_1))
     }
 
     fn last_unbound_socket(&self) -> Option<Rc<dyn SocketControl>> {
-        Some(Rc::clone(&self.p_socket))
+        Some(Rc::clone(&self.socket_2))
     }
 
     fn is_feature_compatible_with_child_socket(
@@ -106,19 +108,14 @@ impl FeatureControl for UniQualifier {
         socket_id: u128,
     ) -> bool {
         /*
-        First make sure this socket is actually a child
+        First make sure socket is actually a child
         */
-        if socket_id == self.c_socket.get_id() || socket_id == self.p_socket.get_id() {
-            /*
-            The only requirement for these sockets is
-            that the feature be of type boolean
-            */
+        if socket_id == self.socket_1.get_id() || socket_id == self.socket_2.get_id() {
             return feature.is_compatible_with_type(BOOLEAN_TYPE);
         }
 
         /*
-        Otherwise, we don't know what the socket is, so
-        automatically return false
+        Otherwise, we don't know what the socket is, so return false
         */
         false
     }
@@ -154,31 +151,13 @@ impl FeatureControl for UniQualifier {
         feature_type: FeatureType,
         request_source: u128,
     ) -> bool {
-        /*
-        If the request if coming from the p_socket, we can
-        pass it to the c_socket
-        */
-        if request_source == self.p_socket.get_id() {
-            /*
-            We only return true.  If it's false, we continue
-            with the function, which will necessarily check the parent
-            */
-            if self.c_socket.is_feature_compatible_with_type(
-                feature_hash,
-                feature_type.clone(),
-                self.get_id(),
-            ) {
-                return true;
-            }
-        }
-
         if let Some(parent) = self.get_parent_socket() {
             /*
-            If the request is coming from child sockets, or the parent socket,
-            we pass the request right back up the tree
+            If the request is coming from either child or parent, send it back
+            to the parent
             */
-            if request_source == self.c_socket.get_id()
-                || request_source == self.p_socket.get_id()
+            if request_source == self.socket_1.get_id()
+                || request_source == self.socket_2.get_id()
                 || request_source == parent.get_id()
             {
                 return parent.is_feature_compatible_with_type(
@@ -189,6 +168,10 @@ impl FeatureControl for UniQualifier {
             }
         }
 
+        /*
+        Otherwise, the request isn't coming from anywhere,
+        so just immediately return false
+        */
         false
     }
 
@@ -206,14 +189,14 @@ impl FeatureControl for UniQualifier {
 
     fn get_subtree_ref_record(&self) -> FeatureSubtreeRefRecord {
         let mut ref_record = self
-            .c_socket
+            .socket_1
             .get_subtree_ref_record()
-            .reconcile(&self.p_socket.get_subtree_ref_record());
+            .reconcile(&self.socket_2.get_subtree_ref_record());
 
         let ref_count = self.get_ref_count();
 
         if ref_count > 0 {
-            ref_record.add_ref_count(self.get_id(), self.get_ref_count());
+            ref_record.add_ref_count(self.get_id(), ref_count);
         }
 
         ref_record

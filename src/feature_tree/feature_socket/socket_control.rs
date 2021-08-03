@@ -1,5 +1,7 @@
 use crate::feature_tree::feature::feature_control::FeatureControl;
-use crate::feature_tree::feature::feature_serialization::FeatureSerialization;
+use crate::feature_tree::feature::feature_serialization::{
+    FeatureSerialization, SocketSerialization,
+};
 use crate::feature_tree::feature_binding::feature_binding_control::FeatureBindingControl;
 use crate::feature_tree::feature_tree_error::FeatureTreeError;
 use crate::feature_tree::feature_type::FeatureType;
@@ -100,10 +102,13 @@ pub trait SocketControl {
 
     fn get_subtree_ref_record(&self) -> FeatureSubtreeRefRecord;
 
-    fn serialize(&self) -> FeatureSerialization {
-        match self.get_feature() {
-            Some(feature) => feature.serialize(),
-            None => FeatureSerialization::Incomplete,
-        }
+    fn serialize(&self) -> SocketSerialization {
+        SocketSerialization::new(
+            self.get_id(),
+            match self.get_feature() {
+                Some(feature) => Some(feature.serialize()),
+                None => None,
+            },
+        )
     }
 }

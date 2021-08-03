@@ -1,5 +1,7 @@
 use crate::feature_tree::feature::feature_control::FeatureControl;
-use crate::feature_tree::feature::feature_serialization::{FeatureSerialization, MapLatex};
+use crate::feature_tree::feature::feature_serialization::{
+    FeatureSerialization, MapLatex, SocketSerialization,
+};
 use crate::feature_tree::feature::features::feature_ids::CONDI_MAP_ID;
 use crate::feature_tree::feature_binding::feature_binding_control::FeatureBindingControl;
 use crate::feature_tree::feature_socket::socket_control::SocketControl;
@@ -71,12 +73,16 @@ impl FeatureControl for Conditional {
 
     fn serialize(&self) -> FeatureSerialization {
         FeatureSerialization::Map {
-            map: Box::new(FeatureSerialization::Leaf {
-                id: CONDI_MAP_ID,
-                latex: "⇒".to_string(),
-            }),
+            map: Box::new(SocketSerialization::new(
+                /* Give the inaccessible socket the same id as the actual map */
+                CONDI_MAP_ID,
+                Some(FeatureSerialization::Leaf {
+                    id: CONDI_MAP_ID,
+                    latex: "⇒".to_string(),
+                }),
+            )),
             map_latex: MapLatex::Basic,
-            arg_latex: Box::new(FeatureSerialization::Tuple {
+            arg: Box::new(FeatureSerialization::Tuple {
                 children: vec![
                     Box::new(self.c_socket.serialize()),
                     Box::new(self.p_socket.serialize()),
@@ -118,8 +124,8 @@ impl FeatureControl for Conditional {
 
     fn is_compatible_with_type(&self, feature_type: FeatureType) -> bool {
         /*
-        First see if the type is statement type, because
-        this sucker is definitely a statement
+        First see if the type is boolean type, because
+        this sucker is definitely a boolean
         */
         if feature_type == BOOLEAN_TYPE {
             return true;
@@ -156,7 +162,7 @@ impl FeatureControl for Conditional {
             We only return true.  If it's false, we continue
             with the function, which will necessarily check the parent
             */
-            if self.p_socket.is_feature_compatible_with_type(
+            if self.c_socket.is_feature_compatible_with_type(
                 feature_hash,
                 feature_type.clone(),
                 self.get_id(),
@@ -165,12 +171,15 @@ impl FeatureControl for Conditional {
             }
         }
 
-        /*
-        If the request is coming from child sockets, then we pass the request
-        up the tree
-        */
-        if request_source == self.c_socket.get_id() || request_source == self.p_socket.get_id() {
-            if let Some(parent) = self.get_parent_socket() {
+        if let Some(parent) = self.get_parent_socket() {
+            /*
+            If the request is coming from child sockets, or the parent socket,
+            we pass the request right back up the tree
+            */
+            if request_source == self.c_socket.get_id()
+                || request_source == self.p_socket.get_id()
+                || request_source == parent.get_id()
+            {
                 return parent.is_feature_compatible_with_type(
                     feature_hash,
                     feature_type,
@@ -179,10 +188,6 @@ impl FeatureControl for Conditional {
             }
         }
 
-        /*
-        Otherwise, we return false because neither cp_statement
-        is in the validity scope of a feature higher in the tree
-        */
         false
     }
 
