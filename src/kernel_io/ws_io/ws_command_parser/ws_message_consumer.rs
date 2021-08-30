@@ -5,14 +5,14 @@ use mockall::*;
 /// and potentially provide responses to be sent back
 /// to all websocket clients.
 #[automock]
-pub trait WsMessageConsumptionPort {
+pub trait WsMessageConsumer {
     /// Consumes a raw ws message and optionally returns
     /// text meant to be sent back through all ws clients
     fn consume_ws_message(&mut self, message: String) -> MessageConsumptionResponse;
 }
 
-pub fn mock_ws_message_consumption_port() -> MockWsMessageConsumptionPort {
-    MockWsMessageConsumptionPort::new()
+pub fn mock_ws_message_consumer() -> MockWsMessageConsumer {
+    MockWsMessageConsumer::new()
 }
 
 /// The response from a message consumer

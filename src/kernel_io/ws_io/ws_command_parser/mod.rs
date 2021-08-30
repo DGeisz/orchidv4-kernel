@@ -1,26 +1,26 @@
-use crate::kernel_io::ws_io::ws_command_consumption_port::ws_commands::WsCommand;
-use crate::kernel_io::ws_io::ws_command_consumption_port::WsCommandConsumptionPort;
-use crate::kernel_io::ws_io::ws_message_consumption_port::{
-    MessageConsumptionResponse, WsMessageConsumptionPort,
+use crate::kernel_io::ws_io::ws_command_adapter::ws_command_consumer::ws_commands::WsCommand;
+use crate::kernel_io::ws_io::ws_command_adapter::ws_command_consumer::WsCommandConsumer;
+use crate::kernel_io::ws_io::ws_command_parser::ws_message_consumer::{
+    MessageConsumptionResponse, WsMessageConsumer,
 };
 use log::error;
+
+pub mod ws_message_consumer;
 
 /// The struct that attempts to parse
 /// the raw text from websocket messages
 /// into meaningful commands
 pub struct WsCommandParser {
-    command_consumer: Box<dyn WsCommandConsumptionPort>,
+    command_consumer: Box<dyn WsCommandConsumer>,
 }
 
 impl WsCommandParser {
-    pub fn new(
-        command_consumer: Box<dyn WsCommandConsumptionPort>,
-    ) -> Box<dyn WsMessageConsumptionPort> {
+    pub fn new(command_consumer: Box<dyn WsCommandConsumer>) -> Box<dyn WsMessageConsumer> {
         Box::new(WsCommandParser { command_consumer })
     }
 }
 
-impl WsMessageConsumptionPort for WsCommandParser {
+impl WsMessageConsumer for WsCommandParser {
     fn consume_ws_message(&mut self, message: String) -> MessageConsumptionResponse {
         /*
         Attempt to deserialize the message

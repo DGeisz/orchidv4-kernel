@@ -5,8 +5,8 @@
 //! any output from the consumption port back through open
 //! websocket connections.
 
-use crate::kernel_io::ws_io::ws_message_consumption_port::{
-    MessageConsumptionResponse, WsMessageConsumptionPort,
+use crate::kernel_io::ws_io::ws_command_parser::ws_message_consumer::{
+    MessageConsumptionResponse, WsMessageConsumer,
 };
 use futures_util::{SinkExt, StreamExt};
 use log::{error, info, trace};
@@ -23,8 +23,8 @@ mod tests;
 
 pub async fn run_server(
     addr: &'static str,
-    generate_consumption_port: fn() -> Box<dyn WsMessageConsumptionPort>,
-    // mut consumption_port: impl WsMessageConsumptionPort + Send + 'static,
+    generate_consumption_port: fn() -> Box<dyn WsMessageConsumer>,
+    // mut consumption_port: impl WsMessageConsumer + Send + 'static,
 ) {
     /*
     First initialize the channels used for

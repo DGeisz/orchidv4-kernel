@@ -7,6 +7,5 @@
 #![allow(warnings)] // Comment out to enable warnings
 
 pub mod curator;
-pub mod feature_tree;
 pub mod kernel_io;
 pub mod utils;
