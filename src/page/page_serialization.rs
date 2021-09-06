@@ -7,9 +7,7 @@ pub struct PageSerialization {
 }
 
 impl PageSerialization {
-    pub fn new(page_id: u128) -> PageSerialization {
-        PageSerialization {
-            id: format!("{:X}", page_id),
-        }
+    pub fn new(id: String) -> PageSerialization {
+        PageSerialization { id }
     }
 }

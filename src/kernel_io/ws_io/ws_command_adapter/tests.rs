@@ -11,7 +11,7 @@ fn test_new_page() {
     */
     let mut mock_curator = mock_curator_control();
 
-    let page_serialization = PageSerialization::new(0);
+    let page_serialization = PageSerialization::new("id".to_string());
 
     mock_curator
         .expect_new_page()

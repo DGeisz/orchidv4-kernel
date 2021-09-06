@@ -31,7 +31,7 @@ fn test_message_consumption() {
     /*
     The response will be a new page
     */
-    let page_id = 1;
+    let page_id = "Here i am".to_string();
 
     let raw_res2 = WsResponse::NewPage {
         target_client,
