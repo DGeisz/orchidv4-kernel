@@ -1,7 +1,9 @@
+use crate::page::lexicon::declaration::constant::constant_serialization::ConstantSerialization;
+use crate::page::lexicon::declaration::definition::definition_serialization::DefinitionSerialization;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Eq, PartialEq, Serialize, Deserialize, Debug, Clone)]
 pub enum DeclarationSerialization {
-    Const(Constant),
-    Def(Definition),
+    Const(ConstantSerialization),
+    Def(DefinitionSerialization),
 }

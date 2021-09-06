@@ -18,7 +18,7 @@ fn test_new_page_get_page() {
     /* Create the actual curator */
     let mut curator = Curator::new(Box::new(mock_page_generator));
 
-    let expected_serialization = PageSerialization::new(page_id.clone());
+    let expected_serialization = PageSerialization::new(page_id.clone(), vec![]);
 
     assert_eq!(curator.new_page(), expected_serialization);
 

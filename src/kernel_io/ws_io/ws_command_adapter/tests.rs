@@ -12,7 +12,7 @@ fn test_new_page() {
     */
     let mut mock_curator = mock_curator_control();
 
-    let page_serialization = PageSerialization::new("id".to_string());
+    let page_serialization = PageSerialization::new("id".to_string(), vec![]);
 
     mock_curator
         .expect_new_page()
@@ -45,7 +45,7 @@ fn test_full_page() {
 
     let page1_id = "id".to_string();
 
-    let page_serialization = PageSerialization::new(page1_id.clone());
+    let page_serialization = PageSerialization::new(page1_id.clone(), vec![]);
 
     mock_curator
         .expect_get_page()

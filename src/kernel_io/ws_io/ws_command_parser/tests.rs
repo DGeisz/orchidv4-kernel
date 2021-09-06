@@ -35,7 +35,7 @@ fn test_message_consumption() {
 
     let raw_res2 = WsResponse::NewPage {
         target_client,
-        new_page: PageSerialization::new(page_id),
+        new_page: PageSerialization::new(page_id, vec![]),
     };
 
     let res2 = serde_json::to_string(&raw_res2).unwrap();
