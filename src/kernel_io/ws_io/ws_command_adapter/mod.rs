@@ -2,6 +2,7 @@ use crate::curator::curator_control::CuratorControl;
 use crate::kernel_io::ws_io::ws_com_res::ws_commands::WsCommand;
 use crate::kernel_io::ws_io::ws_com_res::ws_response::WsResponse;
 use crate::kernel_io::ws_io::ws_command_adapter::ws_command_consumer::WsCommandConsumer;
+use crate::page::page_serialization::PageSerialization;
 
 pub mod ws_command_consumer;
 
@@ -28,6 +29,10 @@ impl WsCommandConsumer for WsCommandAdapter {
                 },
                 false,
             ),
+            WsCommand::FullPage { page_id } => match self.curator.get_page(page_id) {
+                None => (WsResponse::Error, false),
+                Some(page) => (WsResponse::FullPage { page }, false),
+            },
         }
     }
 }

@@ -4,7 +4,13 @@ use crate::page::Page;
 
 pub mod page_generator_control;
 
-pub struct PageGenerator {}
+pub struct PageGenerator;
+
+impl PageGenerator {
+    pub fn new() -> Box<dyn PageGeneratorControl> {
+        Box::new(PageGenerator)
+    }
+}
 
 impl PageGeneratorControl for PageGenerator {
     fn generate_new_page(&self) -> Box<dyn PageControl> {

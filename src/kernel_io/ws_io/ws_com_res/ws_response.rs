@@ -10,4 +10,7 @@ pub enum WsResponse {
         target_client: String,
         new_page: PageSerialization,
     },
+    FullPage {
+        page: PageSerialization,
+    },
 }
