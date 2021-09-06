@@ -1,6 +1,7 @@
 //! The ws_io module provides a websocket-based interface
 //! for controlling the kernel.
 
+pub mod ws_com_res;
 pub mod ws_command_adapter;
 pub mod ws_command_parser;
 pub mod ws_server;

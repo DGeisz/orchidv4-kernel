@@ -1,11 +1,15 @@
-use crate::kernel_io::ws_io::ws_command_adapter::ws_command_consumer::ws_commands::WsCommand;
+use crate::kernel_io::ws_io::ws_com_res::ws_commands::WsCommand;
+use crate::kernel_io::ws_io::ws_com_res::ws_response::WsResponse;
 use crate::kernel_io::ws_io::ws_command_adapter::ws_command_consumer::WsCommandConsumer;
 use crate::kernel_io::ws_io::ws_command_parser::ws_message_consumer::{
     MessageConsumptionResponse, WsMessageConsumer,
 };
-use log::error;
+use log::trace;
 
 pub mod ws_message_consumer;
+
+#[cfg(test)]
+mod tests;
 
 /// The struct that attempts to parse
 /// the raw text from websocket messages
@@ -27,7 +31,7 @@ impl WsMessageConsumer for WsCommandParser {
         */
         let de_result: Result<WsCommand, _> = serde_json::from_str(&message);
 
-        error!("This is result: {:?}", de_result);
+        trace!("This is result: {:?}", de_result);
 
         match de_result {
             Ok(ws_command) => {
@@ -36,11 +40,10 @@ impl WsMessageConsumer for WsCommandParser {
                 /*
                 Check to see if the response is an error,
                 and if so, return none early
-                TODO: Uncomment this when it's not an irrefutable pattern
                 */
-                // if let WsResponse::Error = &response {
-                //     return MessageConsumptionResponse::None;
-                // }
+                if let WsResponse::Error = &response {
+                    return MessageConsumptionResponse::None;
+                }
 
                 let ser_res = serde_json::to_string(&response).unwrap();
 

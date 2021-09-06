@@ -8,4 +8,5 @@
 
 pub mod curator;
 pub mod kernel_io;
+pub mod page;
 pub mod utils;

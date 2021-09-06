@@ -1,4 +1,5 @@
 use mockall::*;
+use serde::{Deserialize, Serialize};
 
 /// This port provides an interface that consumes
 /// the raw text coming straight from ws messages,
@@ -16,7 +17,7 @@ pub fn mock_ws_message_consumer() -> MockWsMessageConsumer {
 }
 
 /// The response from a message consumer
-#[derive(Clone)]
+#[derive(Clone, Deserialize, Serialize, Eq, PartialEq, Debug)]
 pub enum MessageConsumptionResponse {
     /// Indicates we have a message to send back
     /// to all ws clients

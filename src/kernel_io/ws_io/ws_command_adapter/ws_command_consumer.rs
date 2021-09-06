@@ -1,9 +1,6 @@
-use crate::kernel_io::ws_io::ws_command_adapter::ws_command_consumer::ws_commands::WsCommand;
-use crate::kernel_io::ws_io::ws_command_adapter::ws_command_consumer::ws_response::WsResponse;
+use crate::kernel_io::ws_io::ws_com_res::ws_commands::WsCommand;
+use crate::kernel_io::ws_io::ws_com_res::ws_response::WsResponse;
 use mockall::*;
-
-pub mod ws_commands;
-pub mod ws_response;
 
 /// The ws command consumption port provides a port
 /// to a module that processes a parsed ws command.

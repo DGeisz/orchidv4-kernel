@@ -21,10 +21,13 @@ use tokio_tungstenite::{accept_async, tungstenite::protocol::Message};
 #[cfg(test)]
 mod tests;
 
+/// Creates a websocket that server that runs at `addr`,
+/// intakes incoming ws messages, sends them to the generated
+/// consumption port, and broadcasts the output of the
+/// consumption port to all open ws connections
 pub async fn run_server(
     addr: &'static str,
     generate_consumption_port: fn() -> Box<dyn WsMessageConsumer>,
-    // mut consumption_port: impl WsMessageConsumer + Send + 'static,
 ) {
     /*
     First initialize the channels used for
@@ -37,8 +40,6 @@ pub async fn run_server(
     Create a oneshot used for terminating the process
     */
     let (terminate_tx, mut terminate_rx) = watch::channel(false);
-
-    let _unused_clone = in_tx.clone();
 
     /*
     In a new thread, loop on blocking receives to consume
