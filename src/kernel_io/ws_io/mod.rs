@@ -7,6 +7,7 @@ use crate::kernel_io::ws_io::ws_command_parser::ws_message_consumer::WsMessageCo
 use crate::kernel_io::ws_io::ws_command_parser::WsCommandParser;
 use crate::kernel_io::ws_io::ws_server::run_server;
 use crate::page::page_generator::PageGenerator;
+use crate::utils::id_generator::UuidGenerator;
 
 pub mod ws_com_res;
 pub mod ws_command_adapter;
@@ -14,7 +15,7 @@ pub mod ws_command_parser;
 pub mod ws_server;
 
 fn assemble_kernel_with_ws_msg_consumer() -> Box<dyn WsMessageConsumer> {
-    let page_generator = PageGenerator::new();
+    let page_generator = PageGenerator::new(UuidGenerator::new());
     let curator = Curator::new(page_generator);
     let ws_command_adapter = WsCommandAdapter::new(curator);
 

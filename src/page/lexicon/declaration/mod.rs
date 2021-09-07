@@ -1,10 +1,11 @@
 use crate::page::lexicon::declaration::constant::Constant;
-use crate::page::lexicon::declaration::declaration_serialization::DeclarationSerialization;
-use crate::page::lexicon::declaration::definition::definition_serialization::DefinitionSerialization;
+use crate::page::lexicon::declaration::declaration_serialization::DecSer;
+use crate::page::lexicon::declaration::definition::definition_serialization::DefSer;
 use crate::page::lexicon::declaration::definition::Definition;
 
 pub mod constant;
 pub mod declaration_serialization;
+pub mod declaration_socket;
 pub mod definition;
 
 pub enum Declaration {
@@ -13,11 +14,14 @@ pub enum Declaration {
 }
 
 impl BasicDec for Declaration {
-    fn serialize(&self) -> DeclarationSerialization {
-        DeclarationSerialization::Def(DefinitionSerialization::new())
+    fn serialize(&self) -> DecSer {
+        match self {
+            Declaration::Const(constant) => constant.serialize(),
+            Declaration::Def(definition) => definition.serialize(),
+        }
     }
 }
 
 pub trait BasicDec {
-    fn serialize(&self) -> DeclarationSerialization;
+    fn serialize(&self) -> DecSer;
 }

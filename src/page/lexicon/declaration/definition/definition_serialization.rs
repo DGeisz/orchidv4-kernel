@@ -1,10 +1,10 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Eq, PartialEq, Serialize, Deserialize, Debug, Clone)]
-pub struct DefinitionSerialization {}
+pub struct DefSer {}
 
-impl DefinitionSerialization {
-    pub fn new() -> DefinitionSerialization {
-        DefinitionSerialization {}
+impl DefSer {
+    pub fn new() -> DefSer {
+        DefSer {}
     }
 }

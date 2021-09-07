@@ -1,10 +1,10 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Eq, PartialEq, Serialize, Deserialize, Debug, Clone)]
-pub struct ConstantSerialization {}
+pub struct ConstSer {}
 
-impl ConstantSerialization {
-    pub fn new() -> ConstantSerialization {
-        ConstantSerialization {}
+impl ConstSer {
+    pub fn new() -> ConstSer {
+        ConstSer {}
     }
 }

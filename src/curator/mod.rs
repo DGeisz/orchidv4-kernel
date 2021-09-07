@@ -2,6 +2,7 @@ use crate::curator::curator_control::CuratorControl;
 use crate::page::page_control::PageControl;
 use crate::page::page_generator::page_generator_control::PageGeneratorControl;
 use crate::page::page_serialization::PageSerialization;
+use crate::utils::id_generator::IdGenControl;
 use std::collections::HashMap;
 
 pub mod curator_control;
