@@ -5,11 +5,11 @@ use serde::{Deserialize, Serialize};
 #[derive(Eq, PartialEq, Serialize, Deserialize, Debug, Clone)]
 pub struct PageSerialization {
     id: String,
-    declarations: Vec<DecSocketSer>,
+    dec_sockets: Vec<DecSocketSer>,
 }
 
 impl PageSerialization {
-    pub fn new(id: String, declarations: Vec<DecSocketSer>) -> PageSerialization {
-        PageSerialization { id, declarations }
+    pub fn new(id: String, dec_sockets: Vec<DecSocketSer>) -> PageSerialization {
+        PageSerialization { id, dec_sockets }
     }
 }
