@@ -4,7 +4,21 @@ use crate::page::lexicon::declaration::BasicDec;
 
 pub mod definition_serialization;
 
-pub struct Definition;
+pub enum DefVariation {
+    Definition,
+    Theorem,
+    Lemma,
+}
+
+pub struct Definition {
+    variation: DefVariation,
+}
+
+impl Definition {
+    pub fn new(variation: DefVariation) -> Definition {
+        Definition { variation }
+    }
+}
 
 impl BasicDec for Definition {
     fn serialize(&self) -> DecSer {

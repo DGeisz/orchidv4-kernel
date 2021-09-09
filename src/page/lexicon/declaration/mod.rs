@@ -4,6 +4,7 @@ use crate::page::lexicon::declaration::definition::definition_serialization::Def
 use crate::page::lexicon::declaration::definition::Definition;
 
 pub mod constant;
+pub mod dec_names;
 pub mod declaration_serialization;
 pub mod declaration_socket;
 pub mod definition;

@@ -1,3 +1,4 @@
+use crate::page::lexicon::declaration::declaration_serialization::DecSocketSer;
 use crate::page::lexicon::declaration::declaration_socket::DecSocket;
 use crate::page::lexicon::declaration::{BasicDec, Declaration};
 use crate::page::page_control::PageControl;
@@ -34,6 +35,17 @@ impl Page {
             dec_sockets: vec![DecSocket::new(dec_socket_id)],
         })
     }
+
+    fn find_dec_socket(&mut self, socket_id: String) -> Option<&mut DecSocket> {
+        match self
+            .dec_sockets
+            .iter()
+            .position(|socket| socket.get_id() == &socket_id)
+        {
+            None => None,
+            Some(index) => self.dec_sockets.get_mut(index),
+        }
+    }
 }
 
 impl PageControl for Page {
@@ -49,5 +61,13 @@ impl PageControl for Page {
 
     fn get_id(&self) -> &String {
         &self.id
+    }
+
+    /// @NOT TESTED
+    fn fill_dec_socket(&mut self, socket_id: String, dec_name: String) -> Option<DecSocketSer> {
+        match self.find_dec_socket(socket_id) {
+            None => None,
+            Some(socket) => socket.fill_socket(dec_name),
+        }
     }
 }

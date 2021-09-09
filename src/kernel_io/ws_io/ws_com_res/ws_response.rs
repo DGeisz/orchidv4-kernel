@@ -1,3 +1,4 @@
+use crate::page::lexicon::declaration::declaration_serialization::DecSocketSer;
 use crate::page::page_serialization::PageSerialization;
 use serde::{Deserialize, Serialize};
 
@@ -12,5 +13,9 @@ pub enum WsResponse {
     },
     FullPage {
         page: PageSerialization,
+    },
+    DecSocketUpdate {
+        page_id: String,
+        dec_socket_ser: DecSocketSer,
     },
 }

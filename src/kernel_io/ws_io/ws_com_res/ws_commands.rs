@@ -10,4 +10,9 @@ pub enum WsCommand {
     FullPage {
         page_id: String,
     },
+    FillDecSocket {
+        page_id: String,
+        socket_id: String,
+        dec_name: String,
+    },
 }

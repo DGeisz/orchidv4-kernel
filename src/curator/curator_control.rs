@@ -1,3 +1,4 @@
+use crate::page::lexicon::declaration::declaration_serialization::DecSocketSer;
 use crate::page::page_serialization::PageSerialization;
 use mockall::*;
 
@@ -10,6 +11,15 @@ pub trait CuratorControl {
     /// Get a serialization of a page with a given id.
     /// Return None if we don't have that page
     fn get_page(&self, id: String) -> Option<PageSerialization>;
+
+    /// Instruction to fill a dec socket with a structure
+    /// with a particular declaration
+    fn fill_dec_socket(
+        &mut self,
+        page_id: String,
+        socket_id: String,
+        dec_name: String,
+    ) -> Option<DecSocketSer>;
 }
 
 pub fn mock_curator_control() -> MockCuratorControl {

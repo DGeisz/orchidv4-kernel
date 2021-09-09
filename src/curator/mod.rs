@@ -1,4 +1,5 @@
 use crate::curator::curator_control::CuratorControl;
+use crate::page::lexicon::declaration::declaration_serialization::DecSocketSer;
 use crate::page::page_control::PageControl;
 use crate::page::page_generator::page_generator_control::PageGeneratorControl;
 use crate::page::page_serialization::PageSerialization;
@@ -43,6 +44,19 @@ impl CuratorControl for Curator {
         match self.pages.get(&id) {
             None => None,
             Some(page) => Some(page.serialize()),
+        }
+    }
+
+    /// @NOT TESTED
+    fn fill_dec_socket(
+        &mut self,
+        page_id: String,
+        socket_id: String,
+        dec_name: String,
+    ) -> Option<DecSocketSer> {
+        match self.pages.get_mut(&page_id) {
+            None => None,
+            Some(page) => page.fill_dec_socket(socket_id, dec_name),
         }
     }
 }

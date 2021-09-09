@@ -2,6 +2,7 @@ use crate::curator::curator_control::CuratorControl;
 use crate::kernel_io::ws_io::ws_com_res::ws_commands::WsCommand;
 use crate::kernel_io::ws_io::ws_com_res::ws_response::WsResponse;
 use crate::kernel_io::ws_io::ws_command_adapter::ws_command_consumer::WsCommandConsumer;
+use crate::page::lexicon::declaration::declaration_serialization::DecSocketSer;
 use crate::page::page_serialization::PageSerialization;
 
 pub mod ws_command_consumer;
@@ -32,6 +33,23 @@ impl WsCommandConsumer for WsCommandAdapter {
             WsCommand::FullPage { page_id } => match self.curator.get_page(page_id) {
                 None => (WsResponse::Error, false),
                 Some(page) => (WsResponse::FullPage { page }, false),
+            },
+            WsCommand::FillDecSocket {
+                page_id,
+                socket_id,
+                dec_name,
+            } => match self
+                .curator
+                .fill_dec_socket(page_id.clone(), socket_id, dec_name)
+            {
+                None => (WsResponse::Error, false),
+                Some(dec_socket_ser) => (
+                    WsResponse::DecSocketUpdate {
+                        page_id,
+                        dec_socket_ser,
+                    },
+                    false,
+                ),
             },
         }
     }
