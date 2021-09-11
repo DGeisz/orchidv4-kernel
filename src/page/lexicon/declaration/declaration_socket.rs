@@ -4,7 +4,6 @@ use crate::page::lexicon::declaration::declaration_serialization::DecSocketSer;
 use crate::page::lexicon::declaration::definition::{DefVariation, Definition};
 use crate::page::lexicon::declaration::{BasicDec, Declaration};
 use crate::utils::id_generator::IdGenControl;
-use std::process::id;
 use uuid::Uuid;
 
 pub struct DecSocket {
@@ -59,10 +58,10 @@ impl DecSocket {
                             id_generator,
                         )),
                         DeclarationEnum::Theorem => {
-                            Declaration::Def(Definition::new(DefVariation::Theorem, id()))
+                            Declaration::Def(Definition::new(DefVariation::Theorem, id_generator))
                         }
                         DeclarationEnum::Lemma => {
-                            Declaration::Def(Definition::new(DefVariation::Lemma, id()))
+                            Declaration::Def(Definition::new(DefVariation::Lemma, id_generator))
                         }
                     });
 

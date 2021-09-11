@@ -10,6 +10,6 @@ impl TermDefSocket {
     }
 
     pub fn serialize(&self) -> TermDefSocketSer {
-        TermDefSocketSer::new()
+        TermDefSocketSer::new(self.id.clone())
     }
 }

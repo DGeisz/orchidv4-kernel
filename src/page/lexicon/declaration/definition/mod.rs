@@ -4,9 +4,11 @@ use crate::page::lexicon::declaration::BasicDec;
 use crate::page::lexicon::expression::expression_socket::ExprSocket;
 use crate::page::lexicon::term_def::TermDef;
 use crate::utils::id_generator::IdGenControl;
+use serde::{Deserialize, Serialize};
 
 pub mod definition_serialization;
 
+#[derive(Eq, PartialEq, Serialize, Deserialize, Debug, Clone)]
 pub enum DefVariation {
     Definition,
     Theorem,
@@ -31,6 +33,10 @@ impl Definition {
 
 impl BasicDec for Definition {
     fn serialize(&self) -> DecSer {
-        DecSer::Def(DefSer::new())
+        DecSer::Def(DefSer::new(
+            self.variation.clone(),
+            self.term_def.serialize(),
+            self.term_expr.serialize(),
+        ))
     }
 }

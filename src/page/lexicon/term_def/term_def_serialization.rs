@@ -3,11 +3,13 @@ use crate::page::lexicon::term_def::TermDef;
 use serde::{Deserialize, Serialize};
 
 #[derive(Eq, PartialEq, Serialize, Deserialize, Debug, Clone)]
-pub struct TermDefSocketSer {}
+pub struct TermDefSocketSer {
+    id: String,
+}
 
 impl TermDefSocketSer {
-    pub fn new() -> TermDefSocketSer {
-        TermDefSocketSer {}
+    pub fn new(id: String) -> TermDefSocketSer {
+        TermDefSocketSer { id }
     }
 }
 
