@@ -1,4 +1,10 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
-pub struct LetSerialization {}
+#[derive(Eq, PartialEq, Serialize, Deserialize, Debug, Clone)]
+pub struct LetSer {}
+
+impl LetSer {
+    pub fn new() -> LetSer {
+        LetSer {}
+    }
+}

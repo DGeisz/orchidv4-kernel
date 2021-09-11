@@ -1,4 +1,10 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
-pub struct LambdaSerialization {}
+#[derive(Eq, PartialEq, Serialize, Deserialize, Debug, Clone)]
+pub struct LamSer {}
+
+impl LamSer {
+    pub fn new() -> LamSer {
+        LamSer {}
+    }
+}

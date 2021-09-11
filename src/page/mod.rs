@@ -65,9 +65,11 @@ impl PageControl for Page {
 
     /// @NOT TESTED
     fn fill_dec_socket(&mut self, socket_id: String, dec_name: String) -> Option<DecSocketSer> {
+        let id_gen = Rc::clone(&self.id_generator);
+
         match self.find_dec_socket(socket_id) {
             None => None,
-            Some(socket) => socket.fill_socket(dec_name),
+            Some(socket) => socket.fill_socket(dec_name, &id_gen),
         }
     }
 }

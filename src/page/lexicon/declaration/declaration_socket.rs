@@ -3,6 +3,7 @@ use crate::page::lexicon::declaration::dec_names::{name_to_dec_autocomplete, Dec
 use crate::page::lexicon::declaration::declaration_serialization::DecSocketSer;
 use crate::page::lexicon::declaration::definition::{DefVariation, Definition};
 use crate::page::lexicon::declaration::{BasicDec, Declaration};
+use crate::utils::id_generator::IdGenControl;
 use uuid::Uuid;
 
 pub struct DecSocket {
@@ -30,7 +31,11 @@ impl DecSocket {
     }
 
     /// @NOT TESTED
-    pub fn fill_socket(&mut self, dec_name: String) -> Option<DecSocketSer> {
+    pub fn fill_socket(
+        &mut self,
+        dec_name: String,
+        id_generator: &Box<dyn IdGenControl>,
+    ) -> Option<DecSocketSer> {
         /* First check if socket is already full */
         match self.dec {
             Some(_) => None,
@@ -41,11 +46,12 @@ impl DecSocket {
                 Some(dec_type) => {
                     /* Stick the new declaration into the socket */
                     self.dec = Some(match dec_type {
-                        DeclarationEnum::Constant => {
-                            Declaration::Const(Constant::new(ConstVariation::Constant))
-                        }
+                        DeclarationEnum::Constant => Declaration::Const(Constant::new(
+                            ConstVariation::Constant,
+                            id_generator,
+                        )),
                         DeclarationEnum::Axiom => {
-                            Declaration::Const(Constant::new(ConstVariation::Axiom))
+                            Declaration::Const(Constant::new(ConstVariation::Axiom, id_generator))
                         }
                         DeclarationEnum::Definition => {
                             Declaration::Def(Definition::new(DefVariation::Definition))
