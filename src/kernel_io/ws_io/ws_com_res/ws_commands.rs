@@ -10,16 +10,27 @@ pub enum WsCommand {
     FullPage {
         page_id: String,
     },
-    FillDecSocket {
+    DecSocket {
         page_id: String,
+        cmd: DecSocketCommand,
+    },
+}
+
+#[derive(Deserialize, Serialize, Eq, PartialEq, Debug, Clone)]
+pub enum DecSocketCommand {
+    Fill {
         socket_id: String,
         dec_name: String,
     },
-    AppendDecSocket {
-        page_id: String,
-    },
-    DeleteDecSocket {
-        page_id: String,
+    Append,
+    Delete {
         socket_id: String,
+    },
+    DeleteContents {
+        socket_id: String,
+    },
+    Insert {
+        rel_socket_id: String,
+        before_rel: bool,
     },
 }

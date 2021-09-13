@@ -50,27 +50,50 @@ impl CuratorControl for Curator {
     /// @NOT TESTED
     fn fill_dec_socket(
         &mut self,
-        page_id: String,
+        page_id: &String,
         socket_id: String,
         dec_name: String,
     ) -> Option<DecSocketSer> {
-        match self.pages.get_mut(&page_id) {
+        match self.pages.get_mut(page_id) {
             None => None,
             Some(page) => page.fill_dec_socket(socket_id, dec_name),
         }
     }
 
-    fn append_dec_socket(&mut self, page_id: String) -> Option<DecSocketSer> {
-        match self.pages.get_mut(&page_id) {
+    fn append_dec_socket(&mut self, page_id: &String) -> Option<DecSocketSer> {
+        match self.pages.get_mut(page_id) {
             None => None,
             Some(page) => Some(page.append_dec_socket()),
         }
     }
 
-    fn delete_dec_socket(&mut self, page_id: String, socket_id: String) -> bool {
-        match self.pages.get_mut(&page_id) {
+    fn delete_dec_socket(&mut self, page_id: &String, socket_id: String) -> bool {
+        match self.pages.get_mut(page_id) {
             None => false,
             Some(page) => page.delete_dec_socket(socket_id),
+        }
+    }
+
+    fn delete_dec_socket_contents(
+        &mut self,
+        page_id: &String,
+        socket_id: String,
+    ) -> Option<DecSocketSer> {
+        match self.pages.get_mut(page_id) {
+            None => None,
+            Some(page) => page.delete_dec_socket_contents(socket_id),
+        }
+    }
+
+    fn insert_dec_socket(
+        &mut self,
+        page_id: &String,
+        rel_socket_id: &String,
+        before_rel: bool,
+    ) -> Option<DecSocketSer> {
+        match self.pages.get_mut(page_id) {
+            None => None,
+            Some(page) => page.insert_dec_socket(rel_socket_id, before_rel),
         }
     }
 }

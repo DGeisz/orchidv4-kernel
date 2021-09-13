@@ -96,4 +96,40 @@ impl PageControl for Page {
             }
         }
     }
+
+    /// @NOT TESTED
+    ///
+    /// TODO: Check for errors that result from deleting this dec sockets contents
+    fn delete_dec_socket_contents(&mut self, socket_id: String) -> Option<DecSocketSer> {
+        match self.find_dec_socket(&socket_id) {
+            None => None,
+            Some(socket) => socket.delete_contents(),
+        }
+    }
+
+    fn insert_dec_socket(
+        &mut self,
+        rel_socket_id: &String,
+        before_rel: bool,
+    ) -> Option<DecSocketSer> {
+        match self
+            .dec_sockets
+            .iter()
+            .position(|socket| socket.get_id() == rel_socket_id)
+        {
+            None => None,
+            Some(index) => {
+                let new_socket = DecSocket::new(self.id_generator.gen_id());
+                let socket_ser = new_socket.serialize();
+
+                if before_rel {
+                    self.dec_sockets.insert(index, new_socket);
+                } else {
+                    self.dec_sockets.insert(index + 1, new_socket);
+                }
+
+                Some(socket_ser)
+            }
+        }
+    }
 }

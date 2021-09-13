@@ -70,4 +70,18 @@ impl DecSocket {
             },
         }
     }
+
+    /// @NOT TESTED
+    ///
+    /// TODO: Probably build in a better check to determine if this breaks stuff
+    pub fn delete_contents(&mut self) -> Option<DecSocketSer> {
+        match self.dec {
+            None => None,
+            Some(_) => {
+                self.dec = None;
+
+                Some(self.serialize())
+            }
+        }
+    }
 }

@@ -14,16 +14,26 @@ pub enum WsResponse {
     FullPage {
         page: PageSerialization,
     },
-    DecSocketUpdate {
+    DecSocket {
         page_id: String,
+        res: DecSocketRes,
+    },
+}
+
+#[derive(Eq, PartialEq, Serialize, Deserialize, Debug, Clone)]
+pub enum DecSocketRes {
+    Update {
         dec_socket_ser: DecSocketSer,
     },
-    DecSocketAppend {
-        page_id: String,
+    Append {
         dec_socket_ser: DecSocketSer,
     },
-    DecSocketDelete {
-        page_id: String,
+    Insert {
+        rel_socket_id: String,
+        before_rel: bool,
+        dec_socket_ser: DecSocketSer,
+    },
+    Delete {
         dec_socket_id: String,
     },
 }

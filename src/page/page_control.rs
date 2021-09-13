@@ -13,6 +13,18 @@ pub trait PageControl {
     fn append_dec_socket(&mut self) -> DecSocketSer;
 
     fn delete_dec_socket(&mut self, socket_id: String) -> bool;
+
+    fn delete_dec_socket_contents(&mut self, socket_id: String) -> Option<DecSocketSer>;
+
+    fn insert_dec_socket(
+        &mut self,
+        /* Rel socket is the dec socket the new socket is
+        inserted relative to*/
+        rel_socket_id: &String,
+        /* Whether we place the new socket before of after
+        the rel socket*/
+        before_rel: bool,
+    ) -> Option<DecSocketSer>;
 }
 
 pub fn mock_page_control() -> MockPageControl {

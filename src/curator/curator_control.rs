@@ -16,16 +16,29 @@ pub trait CuratorControl {
     /// with a particular declaration
     fn fill_dec_socket(
         &mut self,
-        page_id: String,
+        page_id: &String,
         socket_id: String,
         dec_name: String,
     ) -> Option<DecSocketSer>;
 
     /// Instruction to append a dec socket on the end of
     /// a page
-    fn append_dec_socket(&mut self, page_id: String) -> Option<DecSocketSer>;
+    fn append_dec_socket(&mut self, page_id: &String) -> Option<DecSocketSer>;
 
-    fn delete_dec_socket(&mut self, page_id: String, socket_id: String) -> bool;
+    fn delete_dec_socket(&mut self, page_id: &String, socket_id: String) -> bool;
+
+    fn delete_dec_socket_contents(
+        &mut self,
+        page_id: &String,
+        socket_id: String,
+    ) -> Option<DecSocketSer>;
+
+    fn insert_dec_socket(
+        &mut self,
+        page_id: &String,
+        rel_socket_id: &String,
+        before_rel: bool,
+    ) -> Option<DecSocketSer>;
 }
 
 pub fn mock_curator_control() -> MockCuratorControl {
