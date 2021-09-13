@@ -15,4 +15,11 @@ pub enum WsCommand {
         socket_id: String,
         dec_name: String,
     },
+    AppendDecSocket {
+        page_id: String,
+    },
+    DeleteDecSocket {
+        page_id: String,
+        socket_id: String,
+    },
 }

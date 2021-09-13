@@ -20,6 +20,12 @@ pub trait CuratorControl {
         socket_id: String,
         dec_name: String,
     ) -> Option<DecSocketSer>;
+
+    /// Instruction to append a dec socket on the end of
+    /// a page
+    fn append_dec_socket(&mut self, page_id: String) -> Option<DecSocketSer>;
+
+    fn delete_dec_socket(&mut self, page_id: String, socket_id: String) -> bool;
 }
 
 pub fn mock_curator_control() -> MockCuratorControl {

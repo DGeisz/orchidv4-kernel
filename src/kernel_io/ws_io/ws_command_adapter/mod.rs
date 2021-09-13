@@ -51,6 +51,33 @@ impl WsCommandConsumer for WsCommandAdapter {
                     false,
                 ),
             },
+            WsCommand::AppendDecSocket { page_id } => {
+                match self.curator.append_dec_socket(page_id.clone()) {
+                    None => (WsResponse::Error, false),
+                    Some(dec_socket_ser) => (
+                        WsResponse::DecSocketAppend {
+                            page_id,
+                            dec_socket_ser,
+                        },
+                        false,
+                    ),
+                }
+            }
+            WsCommand::DeleteDecSocket { page_id, socket_id } => {
+                match self
+                    .curator
+                    .delete_dec_socket(page_id.clone(), socket_id.clone())
+                {
+                    false => (WsResponse::Error, false),
+                    true => (
+                        WsResponse::DecSocketDelete {
+                            page_id,
+                            dec_socket_id: socket_id,
+                        },
+                        false,
+                    ),
+                }
+            }
         }
     }
 }

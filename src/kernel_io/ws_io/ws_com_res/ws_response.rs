@@ -18,4 +18,12 @@ pub enum WsResponse {
         page_id: String,
         dec_socket_ser: DecSocketSer,
     },
+    DecSocketAppend {
+        page_id: String,
+        dec_socket_ser: DecSocketSer,
+    },
+    DecSocketDelete {
+        page_id: String,
+        dec_socket_id: String,
+    },
 }

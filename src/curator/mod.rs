@@ -59,4 +59,18 @@ impl CuratorControl for Curator {
             Some(page) => page.fill_dec_socket(socket_id, dec_name),
         }
     }
+
+    fn append_dec_socket(&mut self, page_id: String) -> Option<DecSocketSer> {
+        match self.pages.get_mut(&page_id) {
+            None => None,
+            Some(page) => Some(page.append_dec_socket()),
+        }
+    }
+
+    fn delete_dec_socket(&mut self, page_id: String, socket_id: String) -> bool {
+        match self.pages.get_mut(&page_id) {
+            None => false,
+            Some(page) => page.delete_dec_socket(socket_id),
+        }
+    }
 }

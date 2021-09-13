@@ -9,6 +9,10 @@ pub trait PageControl {
     fn get_id(&self) -> &String;
 
     fn fill_dec_socket(&mut self, socket_id: String, dec_name: String) -> Option<DecSocketSer>;
+
+    fn append_dec_socket(&mut self) -> DecSocketSer;
+
+    fn delete_dec_socket(&mut self, socket_id: String) -> bool;
 }
 
 pub fn mock_page_control() -> MockPageControl {
