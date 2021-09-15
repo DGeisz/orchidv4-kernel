@@ -14,6 +14,10 @@ pub enum WsCommand {
         page_id: String,
         cmd: DecSocketCommand,
     },
+    TermDefSocket {
+        page_id: String,
+        cmd: TermDefSocketCommand,
+    },
 }
 
 #[derive(Deserialize, Serialize, Eq, PartialEq, Debug, Clone)]
@@ -33,4 +37,9 @@ pub enum DecSocketCommand {
         rel_socket_id: String,
         before_rel: bool,
     },
+}
+
+#[derive(Deserialize, Serialize, Eq, PartialEq, Debug, Clone)]
+pub enum TermDefSocketCommand {
+    Fill { tds_id: String, term_seq: String },
 }

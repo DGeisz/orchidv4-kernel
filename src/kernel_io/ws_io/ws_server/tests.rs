@@ -28,7 +28,7 @@ async fn multi_client_test() {
 
     let req2 = String::from("SecondReq");
 
-    let no_op_req = String::from("NoOp");
+    let no_op_req = String::from("NO_OP");
 
     let kill_req = String::from("KillReq");
 
@@ -296,7 +296,7 @@ pub fn create_ws_message_mock() -> Box<dyn WsMessageConsumer> {
 
     let req1 = String::from("FirstReq");
     let req2 = String::from("SecondReq");
-    let no_op_req = String::from("NoOp");
+    let no_op_req = String::from("NO_OP");
     let kill_req = String::from("KillReq");
     let res1 = String::from("Res1");
     let res2 = String::from("Res2");

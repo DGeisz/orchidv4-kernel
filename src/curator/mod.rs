@@ -1,5 +1,6 @@
 use crate::curator::curator_control::CuratorControl;
 use crate::page::lexicon::declaration::declaration_serialization::DecSocketSer;
+use crate::page::lexicon::term_def::term_def_serialization::TermDefSocketSer;
 use crate::page::page_control::PageControl;
 use crate::page::page_generator::page_generator_control::PageGeneratorControl;
 use crate::page::page_serialization::PageSerialization;
@@ -94,6 +95,18 @@ impl CuratorControl for Curator {
         match self.pages.get_mut(page_id) {
             None => None,
             Some(page) => page.insert_dec_socket(rel_socket_id, before_rel),
+        }
+    }
+
+    fn fill_term_def_socket(
+        &mut self,
+        page_id: &String,
+        tds_id: &String,
+        term_seq: String,
+    ) -> Option<TermDefSocketSer> {
+        match self.pages.get_mut(page_id) {
+            None => None,
+            Some(page) => page.fill_term_def_socket(tds_id, term_seq),
         }
     }
 }

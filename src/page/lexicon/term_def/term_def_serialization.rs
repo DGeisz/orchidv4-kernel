@@ -5,11 +5,21 @@ use serde::{Deserialize, Serialize};
 #[derive(Eq, PartialEq, Serialize, Deserialize, Debug, Clone)]
 pub struct TermDefSocketSer {
     id: String,
+    term_seq: Option<String>,
+    representation: Option<String>,
 }
 
 impl TermDefSocketSer {
-    pub fn new(id: String) -> TermDefSocketSer {
-        TermDefSocketSer { id }
+    pub fn new(
+        id: String,
+        term_seq: Option<String>,
+        representation: Option<String>,
+    ) -> TermDefSocketSer {
+        TermDefSocketSer {
+            id,
+            term_seq,
+            representation,
+        }
     }
 }
 

@@ -1,4 +1,5 @@
 use crate::page::lexicon::declaration::declaration_serialization::DecSocketSer;
+use crate::page::lexicon::term_def::term_def_serialization::TermDefSocketSer;
 use crate::page::page_serialization::PageSerialization;
 use mockall::*;
 
@@ -39,6 +40,13 @@ pub trait CuratorControl {
         rel_socket_id: &String,
         before_rel: bool,
     ) -> Option<DecSocketSer>;
+
+    fn fill_term_def_socket(
+        &mut self,
+        page_id: &String,
+        tds_id: &String,
+        term_seq: String,
+    ) -> Option<TermDefSocketSer>;
 }
 
 pub fn mock_curator_control() -> MockCuratorControl {

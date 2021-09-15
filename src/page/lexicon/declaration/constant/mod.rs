@@ -1,7 +1,9 @@
 use crate::page::lexicon::declaration::constant::constant_serialization::ConstSer;
 use crate::page::lexicon::declaration::declaration_serialization::DecSer;
 use crate::page::lexicon::declaration::BasicDec;
+use crate::page::lexicon::term_def::term_def_socket::TermDefSocket;
 use crate::page::lexicon::term_def::TermDef;
+use crate::page::scoped_entity::ScopedEntity;
 use crate::utils::id_generator::IdGenControl;
 use serde::{Deserialize, Serialize};
 
@@ -33,5 +35,11 @@ impl BasicDec for Constant {
             self.variation.clone(),
             self.term_def.serialize(),
         ))
+    }
+}
+
+impl ScopedEntity for Constant {
+    fn get_term_def(&mut self) -> Option<&mut TermDef> {
+        Some(&mut self.term_def)
     }
 }

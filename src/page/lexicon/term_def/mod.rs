@@ -25,4 +25,12 @@ impl TermDef {
             self.type_socket.serialize(),
         )
     }
+
+    pub fn get_def_socket(&self) -> &TermDefSocket {
+        &self.term_def_socket
+    }
+
+    pub fn get_mut_def_socket(&mut self) -> &mut TermDefSocket {
+        &mut self.term_def_socket
+    }
 }

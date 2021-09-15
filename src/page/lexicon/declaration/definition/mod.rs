@@ -2,7 +2,9 @@ use crate::page::lexicon::declaration::declaration_serialization::DecSer;
 use crate::page::lexicon::declaration::definition::definition_serialization::DefSer;
 use crate::page::lexicon::declaration::BasicDec;
 use crate::page::lexicon::expression::expression_socket::ExprSocket;
+use crate::page::lexicon::term_def::term_def_socket::TermDefSocket;
 use crate::page::lexicon::term_def::TermDef;
+use crate::page::scoped_entity::{Scope, ScopedEntity};
 use crate::utils::id_generator::IdGenControl;
 use serde::{Deserialize, Serialize};
 
@@ -38,5 +40,15 @@ impl BasicDec for Definition {
             self.term_def.serialize(),
             self.term_expr.serialize(),
         ))
+    }
+}
+
+impl ScopedEntity for Definition {
+    fn get_term_def_with_scope(&mut self, tds_id: &String) -> Option<(&mut TermDef, Scope)> {
+        self.term_expr.get_term_def_with_scope(tds_id)
+    }
+
+    fn get_term_def(&mut self) -> Option<&mut TermDef> {
+        Some(&mut self.term_def)
     }
 }

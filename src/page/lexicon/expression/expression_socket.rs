@@ -1,5 +1,6 @@
 use crate::page::lexicon::expression::expression_serialization::ExprSocketSer;
 use crate::page::lexicon::expression::Expression;
+use crate::page::scoped_entity::ScopedEntity;
 
 pub struct ExprSocket {
     id: String,
@@ -21,3 +22,5 @@ impl ExprSocket {
         )
     }
 }
+
+impl ScopedEntity for ExprSocket {}
