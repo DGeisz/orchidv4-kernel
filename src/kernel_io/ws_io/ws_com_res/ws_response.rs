@@ -1,7 +1,7 @@
 use crate::page::lexicon::declaration::declaration_serialization::DecSocketSer;
+use crate::page::lexicon::term_def::term_def_serialization::TermDefSocketSer;
 use crate::page::page_serialization::PageSerialization;
 use serde::{Deserialize, Serialize};
-use crate::page::lexicon::term_def::term_def_serialization::TermDefSocketSer;
 
 /// This is a serializable output that can be sent
 /// back to the client
@@ -21,15 +21,15 @@ pub enum WsResponse {
     },
     TermDefSocket {
         page_id: String,
-        res:
-    }
+        res: TermDefSocketRes,
+    },
 }
 
 #[derive(Eq, PartialEq, Serialize, Deserialize, Debug, Clone)]
 pub enum WsError {
     NoOp,
     /*Arg is the socket id*/
-    InvalidInput(String),
+    InvalidTdsInput { page_id: String, socket_id: String },
 }
 
 #[derive(Eq, PartialEq, Serialize, Deserialize, Debug, Clone)]
@@ -50,10 +50,9 @@ pub enum DecSocketRes {
     },
 }
 
-
 #[derive(Eq, PartialEq, Serialize, Deserialize, Debug, Clone)]
 pub enum TermDefSocketRes {
     Update {
-        term_def_socket_ser: TermDefSocketSer
-    }
+        term_def_socket_ser: TermDefSocketSer,
+    },
 }

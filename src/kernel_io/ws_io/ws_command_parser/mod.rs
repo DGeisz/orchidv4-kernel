@@ -1,5 +1,5 @@
 use crate::kernel_io::ws_io::ws_com_res::ws_commands::WsCommand;
-use crate::kernel_io::ws_io::ws_com_res::ws_response::WsResponse;
+use crate::kernel_io::ws_io::ws_com_res::ws_response::{WsError, WsResponse};
 use crate::kernel_io::ws_io::ws_command_adapter::ws_command_consumer::WsCommandConsumer;
 use crate::kernel_io::ws_io::ws_command_parser::ws_message_consumer::{
     MessageConsumptionResponse, WsMessageConsumer,
@@ -38,11 +38,13 @@ impl WsMessageConsumer for WsCommandParser {
                 let (response, terminate) = self.command_consumer.consume_ws_command(ws_command);
 
                 /*
-                Check to see if the response is an error,
-                and if so, return none early
+                Check if the response is an error with a no-op,
+                and if so return None early
                 */
-                if let WsResponse::Error = &response {
-                    return MessageConsumptionResponse::None;
+                if let WsResponse::Error(err) = &response {
+                    if let WsError::NoOp = err {
+                        return MessageConsumptionResponse::None;
+                    }
                 }
 
                 let ser_res = serde_json::to_string(&response).unwrap();

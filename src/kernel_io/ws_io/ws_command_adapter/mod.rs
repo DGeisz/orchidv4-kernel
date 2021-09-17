@@ -120,15 +120,22 @@ impl WsCommandConsumer for WsCommandAdapter {
                         .curator
                         .fill_term_def_socket(&page_id, &tds_id, term_seq)
                     {
-                        None => (WsResponse::Error(WsError::InvalidInput(tds_id)), false),
-                        Some(term_def_socket_ser) => {
-                            (WsResponse::TermDefSocket {
+                        None => (
+                            WsResponse::Error(WsError::InvalidTdsInput {
+                                page_id,
+                                socket_id: tds_id,
+                            }),
+                            false,
+                        ),
+                        Some(term_def_socket_ser) => (
+                            WsResponse::TermDefSocket {
                                 page_id,
                                 res: TermDefSocketRes::Update {
                                     term_def_socket_ser,
                                 },
-                            })
-                        }
+                            },
+                            false,
+                        ),
                     }
                 }
             },

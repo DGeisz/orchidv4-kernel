@@ -30,11 +30,13 @@ pub struct Page {
 impl Page {
     /// Creates a new page
     pub fn new(id_generator: Rc<Box<dyn IdGenControl>>) -> Box<dyn PageControl> {
+        let dec_id = id_generator.gen_id();
+
         Box::new(Page {
             id: id_generator.gen_id(),
             id_generator,
             /* Init with one dec socket for the first line of the page */
-            dec_sockets: vec![],
+            dec_sockets: vec![DecSocket::new(dec_id)],
         })
     }
 
@@ -173,6 +175,9 @@ impl PageControl for Page {
 impl ScopedEntity for Page {
     fn get_term_def_with_scope(&mut self, tds_id: &String) -> Option<(&mut TermDef, Scope)> {
         let mut scope: Scope = Vec::new();
+        /* Use this to determine if this is actually the scope we're looking for
+        and if so, hold a ref to the term def we found */
+        let mut td = None;
 
         /* Go through the dec sockets to see if any have the tds in question*/
         for socket in &mut self.dec_sockets {
@@ -190,7 +195,7 @@ impl ScopedEntity for Page {
                     if term_def.get_def_socket().get_id() == tds_id {
                         /* In this case return the term def in question
                         with the scope we've constructed up until this point */
-                        return Some((term_def, scope));
+                        td = Some(term_def);
                     } else {
                         scope.push(term_def)
                     }
@@ -198,8 +203,9 @@ impl ScopedEntity for Page {
             }
         }
 
-        /* If we didn't find the term def in the last
-        loop, we simply don't have it*/
-        None
+        match td {
+            None => None,
+            Some(term_def) => Some((term_def, scope)),
+        }
     }
 }
