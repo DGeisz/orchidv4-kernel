@@ -42,4 +42,5 @@ pub enum DecSocketCommand {
 #[derive(Deserialize, Serialize, Eq, PartialEq, Debug, Clone)]
 pub enum TermDefSocketCommand {
     Fill { tds_id: String, term_seq: String },
+    DeleteContents { tds_id: String },
 }

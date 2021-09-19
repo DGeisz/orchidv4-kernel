@@ -138,6 +138,20 @@ impl WsCommandConsumer for WsCommandAdapter {
                         ),
                     }
                 }
+                TermDefSocketCommand::DeleteContents { tds_id } => {
+                    match self.curator.delete_tds_contents(&page_id, &tds_id) {
+                        None => NO_OP,
+                        Some(term_def_socket_ser) => (
+                            WsResponse::TermDefSocket {
+                                page_id,
+                                res: TermDefSocketRes::Update {
+                                    term_def_socket_ser,
+                                },
+                            },
+                            false,
+                        ),
+                    }
+                }
             },
         }
     }

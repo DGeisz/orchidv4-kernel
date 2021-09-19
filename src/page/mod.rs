@@ -170,6 +170,18 @@ impl PageControl for Page {
             }
         }
     }
+
+    /// TODO: Add extra f11y that checks what breaks when we delete this term
+    fn delete_tds_contents(&mut self, tds_id: &String) -> Option<TermDefSocketSer> {
+        /* First find the tds in question here */
+        match self.get_term_def_with_scope(tds_id) {
+            None => None,
+            Some((mut term_def, _)) => {
+                /* Now we go in and actually delete the lad */
+                Some(term_def.get_mut_def_socket().delete_term_seq())
+            }
+        }
+    }
 }
 
 impl ScopedEntity for Page {

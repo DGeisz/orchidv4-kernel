@@ -40,4 +40,11 @@ impl TermDefSocket {
 
         self.serialize()
     }
+
+    pub fn delete_term_seq(&mut self) -> TermDefSocketSer {
+        self.term_seq = None;
+        self.representation = None;
+
+        self.serialize()
+    }
 }

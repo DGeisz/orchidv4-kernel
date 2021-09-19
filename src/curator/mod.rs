@@ -109,4 +109,15 @@ impl CuratorControl for Curator {
             Some(page) => page.fill_term_def_socket(tds_id, term_seq),
         }
     }
+
+    fn delete_tds_contents(
+        &mut self,
+        page_id: &String,
+        tds_id: &String,
+    ) -> Option<TermDefSocketSer> {
+        match self.pages.get_mut(page_id) {
+            None => None,
+            Some(page) => page.delete_tds_contents(tds_id),
+        }
+    }
 }

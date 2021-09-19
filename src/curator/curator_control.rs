@@ -47,6 +47,12 @@ pub trait CuratorControl {
         tds_id: &String,
         term_seq: String,
     ) -> Option<TermDefSocketSer>;
+
+    fn delete_tds_contents(
+        &mut self,
+        page_id: &String,
+        tds_id: &String,
+    ) -> Option<TermDefSocketSer>;
 }
 
 pub fn mock_curator_control() -> MockCuratorControl {

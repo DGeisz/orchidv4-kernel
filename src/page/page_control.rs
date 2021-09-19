@@ -32,6 +32,8 @@ pub trait PageControl {
         tds_id: &String,
         char_seq: String,
     ) -> Option<TermDefSocketSer>;
+
+    fn delete_tds_contents(&mut self, tds_id: &String) -> Option<TermDefSocketSer>;
 }
 
 pub fn mock_page_control() -> MockPageControl {
