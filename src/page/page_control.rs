@@ -34,6 +34,8 @@ pub trait PageControl {
     ) -> Option<TermDefSocketSer>;
 
     fn delete_tds_contents(&mut self, tds_id: &String) -> Option<TermDefSocketSer>;
+
+    fn set_term_rep_in_tds(&mut self, tds_id: &String, rep: String) -> Option<PageSerialization>;
 }
 
 pub fn mock_page_control() -> MockPageControl {

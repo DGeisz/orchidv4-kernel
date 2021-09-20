@@ -2,6 +2,7 @@ use crate::page::lexicon::declaration::constant::Constant;
 use crate::page::lexicon::declaration::declaration_serialization::DecSer;
 use crate::page::lexicon::declaration::definition::definition_serialization::DefSer;
 use crate::page::lexicon::declaration::definition::Definition;
+use crate::page::lexicon::term_def::term_def_socket::TermDefSocket;
 use crate::page::lexicon::term_def::TermDef;
 use crate::page::scoped_entity::{Scope, ScopedEntity};
 
@@ -41,6 +42,13 @@ impl ScopedEntity for Declaration {
         match self {
             Declaration::Const(constant) => constant.get_term_def(),
             Declaration::Def(def) => def.get_term_def(),
+        }
+    }
+
+    fn get_tds(&mut self, tds_id: &String) -> Option<&mut TermDefSocket> {
+        match self {
+            Declaration::Const(constant) => constant.get_tds(tds_id),
+            Declaration::Def(def) => def.get_tds(tds_id),
         }
     }
 }

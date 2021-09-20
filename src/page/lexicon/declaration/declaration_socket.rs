@@ -3,6 +3,7 @@ use crate::page::lexicon::declaration::dec_names::{name_to_dec_autocomplete, Dec
 use crate::page::lexicon::declaration::declaration_serialization::DecSocketSer;
 use crate::page::lexicon::declaration::definition::{DefVariation, Definition};
 use crate::page::lexicon::declaration::{BasicDec, Declaration};
+use crate::page::lexicon::term_def::term_def_socket::TermDefSocket;
 use crate::page::lexicon::term_def::TermDef;
 use crate::page::scoped_entity::{Scope, ScopedEntity};
 use crate::utils::id_generator::IdGenControl;
@@ -100,6 +101,13 @@ impl ScopedEntity for DecSocket {
         match &mut self.dec {
             None => None,
             Some(dec) => dec.get_term_def(),
+        }
+    }
+
+    fn get_tds(&mut self, tds_id: &String) -> Option<&mut TermDefSocket> {
+        match &mut self.dec {
+            None => None,
+            Some(dec) => dec.get_tds(tds_id),
         }
     }
 }

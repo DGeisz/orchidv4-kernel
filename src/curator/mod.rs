@@ -120,4 +120,16 @@ impl CuratorControl for Curator {
             Some(page) => page.delete_tds_contents(tds_id),
         }
     }
+
+    fn set_term_rep_in_tds(
+        &mut self,
+        page_id: &String,
+        tds_id: &String,
+        rep: String,
+    ) -> Option<PageSerialization> {
+        match self.pages.get_mut(page_id) {
+            None => None,
+            Some(page) => page.set_term_rep_in_tds(tds_id, rep),
+        }
+    }
 }

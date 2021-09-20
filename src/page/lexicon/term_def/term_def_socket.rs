@@ -47,4 +47,10 @@ impl TermDefSocket {
 
         self.serialize()
     }
+
+    pub fn set_term_rep(&mut self, rep: String) -> bool {
+        self.representation = Some(rep);
+
+        true
+    }
 }

@@ -43,4 +43,5 @@ pub enum DecSocketCommand {
 pub enum TermDefSocketCommand {
     Fill { tds_id: String, term_seq: String },
     DeleteContents { tds_id: String },
+    SetRep { tds_id: String, rep: String },
 }

@@ -2,6 +2,7 @@ use crate::page::lexicon::declaration::declaration_serialization::DecSocketSer;
 use crate::page::lexicon::declaration::declaration_socket::DecSocket;
 use crate::page::lexicon::declaration::{BasicDec, Declaration};
 use crate::page::lexicon::term_def::term_def_serialization::TermDefSocketSer;
+use crate::page::lexicon::term_def::term_def_socket::TermDefSocket;
 use crate::page::lexicon::term_def::TermDef;
 use crate::page::page_control::PageControl;
 use crate::page::page_serialization::PageSerialization;
@@ -174,11 +175,24 @@ impl PageControl for Page {
     /// TODO: Add extra f11y that checks what breaks when we delete this term
     fn delete_tds_contents(&mut self, tds_id: &String) -> Option<TermDefSocketSer> {
         /* First find the tds in question here */
-        match self.get_term_def_with_scope(tds_id) {
+        match self.get_tds(tds_id) {
             None => None,
-            Some((mut term_def, _)) => {
+            Some(tds) => {
                 /* Now we go in and actually delete the lad */
-                Some(term_def.get_mut_def_socket().delete_term_seq())
+                Some(tds.delete_term_seq())
+            }
+        }
+    }
+
+    fn set_term_rep_in_tds(&mut self, tds_id: &String, rep: String) -> Option<PageSerialization> {
+        match self.get_tds(tds_id) {
+            None => None,
+            Some(tds) => {
+                if tds.set_term_rep(rep) {
+                    Some(self.serialize())
+                } else {
+                    None
+                }
             }
         }
     }
@@ -219,5 +233,15 @@ impl ScopedEntity for Page {
             None => None,
             Some(term_def) => Some((term_def, scope)),
         }
+    }
+
+    fn get_tds(&mut self, tds_id: &String) -> Option<&mut TermDefSocket> {
+        for socket in &mut self.dec_sockets {
+            if let Some(tds) = socket.get_tds(tds_id) {
+                return Some(tds);
+            }
+        }
+
+        None
     }
 }

@@ -42,4 +42,14 @@ impl ScopedEntity for Constant {
     fn get_term_def(&mut self) -> Option<&mut TermDef> {
         Some(&mut self.term_def)
     }
+
+    fn get_tds(&mut self, tds_id: &String) -> Option<&mut TermDefSocket> {
+        let tds = self.term_def.get_mut_def_socket();
+
+        if tds.get_id() == tds_id {
+            Some(tds)
+        } else {
+            None
+        }
+    }
 }

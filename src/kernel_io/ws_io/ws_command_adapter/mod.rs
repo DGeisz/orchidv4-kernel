@@ -152,6 +152,12 @@ impl WsCommandConsumer for WsCommandAdapter {
                         ),
                     }
                 }
+                TermDefSocketCommand::SetRep { tds_id, rep } => {
+                    match self.curator.set_term_rep_in_tds(&page_id, &tds_id, rep) {
+                        None => NO_OP,
+                        Some(page_ser) => (WsResponse::FullPage { page: page_ser }, false),
+                    }
+                }
             },
         }
     }

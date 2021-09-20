@@ -1,5 +1,6 @@
 use crate::page::lexicon::expression::expression_serialization::ExprSocketSer;
 use crate::page::lexicon::expression::Expression;
+use crate::page::lexicon::term_def::term_def_socket::TermDefSocket;
 use crate::page::scoped_entity::ScopedEntity;
 
 pub struct ExprSocket {
@@ -23,4 +24,8 @@ impl ExprSocket {
     }
 }
 
-impl ScopedEntity for ExprSocket {}
+impl ScopedEntity for ExprSocket {
+    fn get_tds(&mut self, tds_id: &String) -> Option<&mut TermDefSocket> {
+        None
+    }
+}
